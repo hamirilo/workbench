@@ -70,7 +70,7 @@ import { comboMatches, fromField } from "./keys";
 import { invert, viewportTransform } from "./geometry";
 import { pageBox, stepZoom } from "./layout";
 import { findNext } from "./search";
-import { checkForUpdate } from "./update";
+import { checkForUpdate, openReleaseNotes } from "./update";
 import { bringToFront, deleteSelectedAnnot } from "../components/Overlay";
 import { useSealDialog } from "../components/SealDialog";
 import { activeDoc, findAnnot, newAnnotId, useStore, type S, type Tool } from "../store";
@@ -414,6 +414,10 @@ export const COMMANDS: Command[] = [
 
   { id: "app.settings", title: "設定…", keys: ["Mod+,"], words: ["名前", "作成者", "文字の大きさ", "大きく", "アップデート"], run: (s) => s.openDialog("settings") },
   { id: "app.checkUpdate", title: "アップデートを確認…", words: ["更新", "新しいバージョン"], run: () => void checkForUpdate(true) },
+  { id: "help.releaseNotes", title: "このバージョンの更新内容", words: ["リリースノート", "新しい機能", "変更点"], run: () => openReleaseNotes() },
+  // Windows' ヘルプ menu (macOS has the system's about panel in the app menu):
+  // the settings' アップデート section shows the app, its version and updates.
+  { id: "help.about", title: "PDF One について", words: ["バージョン", "情報"], run: (s) => s.openDialog("settings") },
   {
     id: "help.guide",
     title: "使い方",

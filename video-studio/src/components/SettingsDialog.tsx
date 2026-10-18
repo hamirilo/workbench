@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, type AppSettings } from "../lib/api";
-import { appVersion } from "../lib/update";
 import { useStore } from "../store";
-import { Modal } from "./Modal";
+import { SettingsFrame, type SettingsGroup } from "./SettingsFrame";
+import { UpdateSection } from "./UpdateSection";
 
-/** ⌘, (Platform UI §9): one dialog for all settings. */
+const GROUPS: SettingsGroup<"general">[] = [{ pages: [{ id: "general", label: "一般" }] }];
+
+/** ⌘, (Platform UI §9): one dialog for all settings, in the frame every tool shares. */
 export function SettingsDialog() {
   // The function itself, not one made in the selector: a new function on
   // every read makes zustand re-render without end.
@@ -23,22 +25,11 @@ export function SettingsDialog() {
   };
 
   return (
-    <Modal title="設定" onClose={close}>
-      {settings && (
-        <label className="flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox"
-            className="mt-0.5 accent-accent"
-            checked={settings.autoUpdate}
-            onChange={(e) => change({ ...settings, autoUpdate: e.target.checked })}
-          />
-          <span>
-            <span className="block">アップデートを自動で確認する</span>
-            <span className="mt-0.5 block text-xs text-dim">起動して数秒後に、新しいバージョンがあるかを確かめます。</span>
-          </span>
-        </label>
-      )}
-      <div className="mt-6 text-xs text-dim">Video Studio {appVersion()}</div>
-    </Modal>
+    <SettingsFrame groups={GROUPS} page="general" onPage={() => {}} onClose={close}>
+      <UpdateSection
+        autoUpdate={settings?.autoUpdate}
+        onAutoUpdate={(autoUpdate) => settings && change({ ...settings, autoUpdate })}
+      />
+    </SettingsFrame>
   );
 }

@@ -125,6 +125,8 @@ export const api = {
   setAppSettings: (settings: AppSettings) => invoke<AppSettings>("set_app_settings", { settings }),
   systemProxy: (url: string) => invoke<string | null>("system_proxy", { url }),
   revealLog: () => invoke<void>("reveal_log"),
+  /** The GitHub release page of `version` (what changed), in the browser. */
+  openReleasePage: (version: string) => invoke<void>("open_release_page", { version }),
 
   /** `replace` null (a drop): a new list when a folder is among `paths`. */
   addPaths: (paths: string[], replace: boolean | null, includeHidden = false) =>

@@ -9,7 +9,7 @@ import { addFiles, clearList, openFolder, runRename, undoLast } from "./actions"
 import { api } from "./api";
 import { RULE_KINDS } from "./ruleDraft";
 import { comboMatches, fromField } from "./keys";
-import { checkForUpdate } from "./update";
+import { checkForUpdate, openReleaseNotes } from "./update";
 import { useStore, type S } from "../store";
 
 export interface Command {
@@ -143,6 +143,10 @@ export const COMMANDS: Command[] = [
   },
   { id: "app.settings", title: "設定…", keys: ["Mod+,"], run: (s) => s.openDialog("settings") },
   { id: "app.checkUpdate", title: "アップデートを確認…", run: () => void checkForUpdate(true) },
+  { id: "help.releaseNotes", title: "このバージョンの更新内容", run: () => openReleaseNotes() },
+  // Windows' ヘルプ menu (macOS has the system's about panel in the app menu):
+  // the settings' アップデート section shows the app, its version and updates.
+  { id: "help.about", title: "Renamer について", run: (s) => s.openDialog("settings") },
   { id: "help.shortcuts", title: "キーボードショートカット", keys: ["?"], run: (s) => s.openDialog("shortcuts") },
   {
     id: "help.log",

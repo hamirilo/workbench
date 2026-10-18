@@ -88,7 +88,9 @@ PDF をダブルクリックで開きたいときは、PDF の「プログラム
 
 ## アップデート
 
-起動して数秒後に新しいバージョンを確かめ、あればダイアログで知らせる。「更新して再起動」で入れ替わる（2 回目以降は警告が出ない）。手動では **PDF One › アップデートを確認…**（Windows は **ヘルプ › アップデートを確認…**）。自動の確認は設定（⌘,）で止められる。
+起動して数秒後に新しいバージョンを確かめ、あれば「PDF One の新しいバージョンがあります」のダイアログで知らせる。「更新して再起動」で入れ替わる（2 回目以降は警告が出ない）。何が変わったかはダイアログに載せず、「更新内容を見る」で GitHub のリリースのページを開く。「あとで」にしたものは設定（⌘,）の「アップデート」から入れられる。
+
+手動では **PDF One › アップデートを確認…**（Windows は **ヘルプ › アップデートを確認…**）か、設定の「アップデートを確認」。自動の確認は設定で止められる。更新して起動し直した最初の 1 回だけ、更新したことをトーストで知らせる（［更新内容を見る］付き）。
 
 ## ログ
 
@@ -129,12 +131,14 @@ Linux で Rust をビルドするには `libwebkit2gtk-4.1-dev` などが要る�
 
 雛形（`proxy.rs`、`settings.rs`、`log.ts`、`titleBar.ts`、`update.ts`、`menuBar.ts`、`Toasts.tsx`、ビルド設定）は [Disk Analyzer](../disk-analyzer/) から写した。desktop-base ができたら差し替える。
 
+設定画面の枠と行（`SettingsFrame.tsx`）と「アップデート」の節（`UpdateSection.tsx`）は stockroom と同じファイルを置いている（desktop-platform UI §9）。直すときはすべてのツールで同じに直す。
+
 ## リリース
 
 workbench の決まり（リポジトリ直下の README「リポジトリの決まりごと」、Platform Optional「複数ツール同居リポジトリ」）に従う。
 
 1. バージョンを `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` の 3 か所で上げ、lockfile も更新する（`npm version X --no-git-tag-version`、`cargo update -p pdf-one --manifest-path src-tauri/Cargo.toml`）
-2. `CHANGELOG.md` に `## <version>` の節を書く（変更点 / ダウンロード / 注意。リリースの本文になり、変更点はアップデートのダイアログにも出る）
+2. `CHANGELOG.md` に `## <version>` の節を書く（変更点 / ダウンロード / 注意。リリースの本文になる。アップデートのダイアログと設定の「更新内容」からこのページへ飛ぶ）
 3. `chore: pdf-one v<version>` を PR で `main` に入れる
 4. Actions › **pdf-one** › **Run workflow** で `main`、`release` にチェックを入れて実行する。`pdf-one-v<version>` の tag を push しても同じ
 5. CI が tag と version の一致、CHANGELOG の節、更新ファイルの有無を確かめ、`PDF One v<version>` のリリースを作って公開し、固定リリース `pdf-one-updater` の `latest.json` を差し替える。配布済みのアプリはここを見て更新する

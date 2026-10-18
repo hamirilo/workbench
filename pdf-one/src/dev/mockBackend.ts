@@ -226,6 +226,7 @@ export async function mockCommand(cmd: string, args?: unknown): Promise<unknown>
       saveDrafts(d);
       return null;
     }
+    case "open_release_page":
     case "reveal_log":
     case "reveal_backups":
     case "reveal_file":

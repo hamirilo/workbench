@@ -63,6 +63,7 @@ async function handle(cmd: string, a: Record<string, unknown>): Promise<unknown>
       return settings;
     case "system_proxy":
       return null;
+    case "open_release_page":
     case "reveal_log":
     case "reveal_path":
     case "cancel_export":
