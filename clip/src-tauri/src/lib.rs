@@ -183,6 +183,29 @@ fn open_manager(app: AppHandle) {
     show_manager(&app);
 }
 
+/// The settings' "アップデート" section: what the last check found.
+#[tauri::command]
+fn update_state() -> update::UpdateState {
+    update::state()
+}
+
+#[tauri::command]
+fn check_update(app: AppHandle) {
+    update::check(&app, update::Check::Settings);
+}
+
+#[tauri::command]
+fn install_update(app: AppHandle) {
+    update::install_found(&app);
+}
+
+/// A version's GitHub release page (this one's without `version`). The URL is
+/// made here, so the window can't open any other.
+#[tauri::command]
+fn open_release_page(app: AppHandle, version: Option<String>) {
+    update::open_release_page(&version.unwrap_or_else(|| app.package_info().version.to_string()));
+}
+
 /// Asks for the Accessibility permission and opens its pane in System
 /// Settings, where Clip has to be switched on (macOS).
 #[tauri::command]
@@ -335,7 +358,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
             "record" => toggle_recording(app),
             "clear" => confirm_clear_history(app),
             "login" => login_item::toggle(app, &login),
-            "update" => update::check(app, true),
+            "update" => update::check(app, update::Check::Menu),
             "quit" => app.exit(0),
             _ => {}
         });
@@ -407,6 +430,10 @@ pub fn run() {
             set_settings,
             open_manager,
             request_accessibility,
+            update_state,
+            check_update,
+            install_update,
+            open_release_page,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

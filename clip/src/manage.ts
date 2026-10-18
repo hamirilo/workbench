@@ -1,5 +1,5 @@
 import { listen } from "@tauri-apps/api/event";
-import { api, el, isMac, oneLine, Settings, shortcutLabel, Snippet, Status } from "./shared";
+import { api, el, isMac, oneLine, Settings, shortcutLabel, Snippet, Status, UpdateState } from "./shared";
 
 /** Offered as one-click additions; each becomes a snippet with that name. */
 const PRESETS = [
@@ -43,6 +43,7 @@ let saveTimer: number | undefined;
 let deleteArmed: number | undefined;
 let status: Status | null = null;
 let settings: Settings | null = null;
+let update: UpdateState = { state: "idle" };
 
 // ---------------------------------------------------------------------------
 // Tabs
@@ -216,9 +217,21 @@ function fillSelect(select: HTMLSelectElement, options: [string, string][]) {
   );
 }
 
-fillSelect(
-  $("shortcut"),
-  SHORTCUTS.map(([value, note]) => [value, note ? `${shortcutLabel(value)}（${note}）` : shortcutLabel(value)]),
+/** A few to choose from: one radio row each, with what it can clash with. */
+$("shortcuts").replaceChildren(
+  ...SHORTCUTS.map(([value, note]) => {
+    const row = el("label", "s-row clickable");
+    const radio = el("input");
+    radio.type = "radio";
+    radio.name = "shortcut";
+    radio.value = value;
+    radio.addEventListener("change", () => saveSettings({ shortcut: value }));
+    const text = el("span", "s-text");
+    text.append(el("span", "s-label", shortcutLabel(value)));
+    if (note) text.append(el("span", "s-hint", note));
+    row.append(radio, text);
+    return row;
+  }),
 );
 fillSelect(
   $("limit"),
@@ -229,6 +242,10 @@ fillSelect(
   DAYS.map((n) => [String(n), n === 365 ? "1 年" : `${n} 日`]),
 );
 
+function setSwitch(id: string, on: boolean) {
+  $(id).setAttribute("aria-checked", String(on));
+}
+
 async function loadSettings() {
   try {
     settings = await api.settings();
@@ -237,8 +254,11 @@ async function loadSettings() {
     console.error("settings", e);
     return;
   }
-  $<HTMLSelectElement>("shortcut").value = settings.shortcut;
-  $<HTMLInputElement>("record").checked = settings.recordHistory;
+  for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="shortcut"]')) {
+    radio.checked = radio.value === settings.shortcut;
+  }
+  setSwitch("record", settings.recordHistory);
+  setSwitch("auto-update", settings.autoUpdate);
   $<HTMLSelectElement>("limit").value = String(settings.historyLimit);
   $<HTMLSelectElement>("days").value = String(settings.historyDays);
 
@@ -255,7 +275,7 @@ async function loadSettings() {
     ? "許可されています。選んだものを、それまで使っていたアプリにそのまま入力します。"
     : "許可されていません。いまは選ぶとコピーだけされるので、⌘V で貼り付けてください。アップデートのあとで動かなくなったときは、システム設定のアクセシビリティで Clip を一度「−」で外してから、もう一度許可してください。";
   $("allow").hidden = status.autoPaste;
-  $("version").textContent = `Clip v${status.version}`;
+  $("version").textContent = `v${status.version}`;
 }
 
 async function saveSettings(change: Partial<Settings>) {
@@ -271,14 +291,80 @@ async function saveSettings(change: Partial<Settings>) {
   await loadSettings();
 }
 
-$("shortcut").addEventListener("change", (e) => saveSettings({ shortcut: (e.target as HTMLSelectElement).value }));
-$("record").addEventListener("change", (e) => saveSettings({ recordHistory: (e.target as HTMLInputElement).checked }));
+$("record").addEventListener("click", () => saveSettings({ recordHistory: !settings?.recordHistory }));
+$("auto-update").addEventListener("click", () => saveSettings({ autoUpdate: !settings?.autoUpdate }));
 $("limit").addEventListener("change", (e) =>
   saveSettings({ historyLimit: Number((e.target as HTMLSelectElement).value) }),
 );
 $("days").addEventListener("change", (e) => saveSettings({ historyDays: Number((e.target as HTMLSelectElement).value) }));
 $("clear-history").addEventListener("click", () => api.askClearHistory());
 $("allow").addEventListener("click", () => api.requestAccessibility());
+
+// ---------------------------------------------------------------------------
+// Update (desktop-platform UI §9.1). While this window is open, the checks'
+// results come here instead of a dialog.
+
+function renderUpdate() {
+  const statusEl = $("update-status");
+  statusEl.className = "s-hint";
+  statusEl.title = "";
+  switch (update.state) {
+    case "checking":
+      statusEl.textContent = "確認しています…";
+      break;
+    case "latest":
+      statusEl.textContent = "最新版です";
+      statusEl.classList.add("good");
+      break;
+    case "available":
+      statusEl.textContent = `v${update.version} が使えます`;
+      statusEl.classList.add("good");
+      break;
+    case "installing":
+      statusEl.textContent =
+        update.percent === null ? "アップデートを準備しています…" : `ダウンロードしています… ${update.percent}%`;
+      break;
+    case "error":
+      statusEl.textContent = "確認できませんでした。ネットワークを確かめて、もう一度お試しください";
+      statusEl.title = update.message;
+      statusEl.classList.add("bad");
+      break;
+    case "failed":
+      statusEl.textContent = `v${update.version} に更新できませんでした。もう一度お試しください`;
+      statusEl.title = update.message;
+      statusEl.classList.add("bad");
+      break;
+    default:
+      statusEl.textContent = "";
+  }
+  const available = update.state === "available" || update.state === "failed";
+  $("release-notes").hidden = !available;
+  $("install-update").hidden = !available;
+  $("check-update").hidden = available;
+  $<HTMLButtonElement>("check-update").disabled = update.state === "checking" || update.state === "installing";
+  $("update-dot").hidden = !available;
+}
+
+$("check-update").addEventListener("click", () => api.checkUpdate());
+$("install-update").addEventListener("click", () => api.installUpdate());
+$("release-notes").addEventListener("click", () => {
+  if (update.state === "available" || update.state === "failed") api.openReleasePage(update.version);
+});
+$("this-release").addEventListener("click", () => api.openReleasePage());
+
+listen<UpdateState>("update-state", (e) => {
+  update = e.payload;
+  renderUpdate();
+});
+// "アップデートを確認…" in the tray menu while this window is open.
+listen("show-update", () => {
+  showTab("settings");
+  $("update").scrollIntoView({ block: "nearest" });
+});
+api.updateState().then((state) => {
+  update = state;
+  renderUpdate();
+});
 
 // ---------------------------------------------------------------------------
 
