@@ -58,6 +58,7 @@ pub fn with_commands<R: Runtime>(builder: tauri::Builder<R>) -> tauri::Builder<R
         text_font_family,
         system_proxy,
         reveal_log,
+        open_release_page,
         reveal_backups,
         reveal_file,
         take_open_requests,

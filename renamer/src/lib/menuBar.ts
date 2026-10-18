@@ -135,8 +135,9 @@ async function build(): Promise<Menu> {
       : []),
     submenu("ヘルプ", [
       cmd("help.shortcuts"),
+      cmd("help.releaseNotes"),
       cmd("help.log"),
-      ...(isMac ? [] : [sep(), cmd("app.checkUpdate")]),
+      ...(isMac ? [] : [sep(), cmd("app.checkUpdate"), cmd("help.about")]),
     ]),
   ]);
   return Menu.new({ items });

@@ -48,6 +48,31 @@ pub async fn system_proxy(url: String) -> Option<String> {
         .flatten()
 }
 
+/// Opens the GitHub release page of `version` in the browser. The update
+/// dialog and the settings' アップデート section link there for what changed,
+/// instead of showing the release notes in the app.
+#[tauri::command]
+pub fn open_release_page(version: String) -> CmdResult<()> {
+    tauri_plugin_opener::open_url(release_page(&version)?, None::<&str>).map_err(err)
+}
+
+/// Same repository as `plugins.updater.endpoints` in tauri.conf.json; the
+/// tag is `video-studio-v<version>` (the repository's other tools share it). Only a
+/// version goes into the URL, so the page can't be sent anywhere else.
+fn release_page(version: &str) -> CmdResult<String> {
+    let version = version.strip_prefix('v').unwrap_or(version);
+    let ok = !version.is_empty()
+        && version
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '+'));
+    if !ok {
+        return Err(format!("not a version: {version}"));
+    }
+    Ok(format!(
+        "https://github.com/2204601/workbench/releases/tag/video-studio-v{version}"
+    ))
+}
+
 /// ヘルプ › ログを表示: the log file in Finder / Explorer.
 #[tauri::command]
 pub fn reveal_log<R: Runtime>(app: AppHandle<R>) -> CmdResult<()> {
@@ -341,4 +366,18 @@ pub async fn ffmpeg_version() -> CmdResult<String> {
         })
     })
     .await?
+}
+
+#[cfg(test)]
+mod release_page_tests {
+    #[test]
+    fn takes_only_a_version() {
+        let page = "https://github.com/2204601/workbench/releases/tag/video-studio-v0.2.0";
+        assert_eq!(super::release_page("0.2.0").unwrap(), page);
+        assert_eq!(super::release_page("v0.2.0").unwrap(), page);
+        assert!(super::release_page("1.0.0-beta.1").is_ok());
+        assert!(super::release_page("").is_err());
+        assert!(super::release_page("0.2.0/../../evil").is_err());
+        assert!(super::release_page("0.2.0?x=1").is_err());
+    }
 }

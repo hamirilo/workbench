@@ -190,6 +190,7 @@ async function handle(cmd: string, payload: unknown): Promise<unknown> {
       return settings;
     case "system_proxy":
       return null;
+    case "open_release_page":
     case "reveal_log":
       console.info("[mock] reveal log");
       return null;

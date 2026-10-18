@@ -7,7 +7,11 @@
 //!
 //! The check runs a few seconds after launch and then once a day while the
 //! app keeps running (release builds only), and from the tray menu. The tray
-//! menu item also shows the download's progress.
+//! menu item also shows the download's progress, and an update put off with
+//! "あとで" (its version, to install it from there).
+//!
+//! The dialog names the app in its title, and what changed is on the GitHub
+//! release page ("更新内容を見る"), not in the dialog (Platform Distribution §4).
 
 use std::{
     sync::atomic::{AtomicBool, Ordering},
@@ -16,7 +20,7 @@ use std::{
 };
 
 use tauri::{async_runtime::block_on, menu::MenuItem, AppHandle, Manager, Url, Wry};
-use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind, MessageDialogResult};
 use tauri_plugin_updater::{Update, UpdaterExt};
 
 use crate::proxy;
@@ -25,6 +29,9 @@ use crate::proxy;
 /// releases share this repository, so the feed lives on its own fixed release
 /// instead of `releases/latest`.
 const FEED: &str = "https://github.com/2204601/workbench/releases/download/meter-updater/latest.json";
+
+/// The tag of a version's release (and its notes) in the same repository.
+const RELEASE_PAGE: &str = "https://github.com/2204601/workbench/releases/tag/meter-v";
 
 pub const MENU_LABEL: &str = "アップデートを確認…";
 
@@ -74,8 +81,9 @@ pub fn check(app: &AppHandle, manual: bool) {
         if manual {
             set_menu(&app, "アップデートを確認しています…", false);
         }
+        let mut later = None;
         match find(&app) {
-            Ok(Some(update)) => offer(&app, update),
+            Ok(Some(update)) => later = offer(&app, update),
             Ok(None) if manual => {
                 let version = app.package_info().version.to_string();
                 show(&app, MessageDialogKind::Info, format!("Meter v{version} は最新版です。"));
@@ -86,7 +94,11 @@ pub fn check(app: &AppHandle, manual: bool) {
             }
             Err(e) => log::warn!("update check failed: {e}"),
         }
-        set_menu(&app, MENU_LABEL, true);
+        // Put off: the menu item offers that version until the next check.
+        match later {
+            Some(version) => set_menu(&app, &format!("v{version} に更新…"), true),
+            None => set_menu(&app, MENU_LABEL, true),
+        }
         BUSY.store(false, Ordering::SeqCst);
     });
 }
@@ -102,23 +114,41 @@ fn find(app: &AppHandle) -> tauri_plugin_updater::Result<Option<Update>> {
     block_on(builder.build()?.check())
 }
 
-fn offer(app: &AppHandle, update: Update) {
-    let mut text = format!("新しいバージョン v{} があります（現在 v{}）。", update.version, update.current_version);
-    if let Some(notes) = update.body.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
-        text.push_str("\n\n");
-        text.extend(notes.chars().take(600));
-    }
-    text.push_str("\n\nダウンロードして再起動しますか？");
+const INSTALL: &str = "更新して再起動";
+const LATER: &str = "あとで";
+const NOTES: &str = "更新内容を見る";
+
+/// Asks whether to install; returns the version when it was put off. The
+/// title names the app (on macOS the alert's bold line, on Windows the
+/// window's title), so it never reads as an anonymous pop-up.
+fn offer(app: &AppHandle, update: Update) -> Option<String> {
+    let name = &app.package_info().name;
+    let text = format!(
+        "v{} が使えます（今のバージョンは v{}）。\n更新すると {name} が再起動します。",
+        update.version, update.current_version
+    );
+    // Each OS's order: macOS puts the default on the right with "later" next
+    // to it, Windows puts the default first and "later" last (Esc is "later").
+    let buttons = if cfg!(target_os = "macos") {
+        MessageDialogButtons::YesNoCancelCustom(INSTALL.into(), LATER.into(), NOTES.into())
+    } else {
+        MessageDialogButtons::YesNoCancelCustom(INSTALL.into(), NOTES.into(), LATER.into())
+    };
     bring_to_front(app);
-    let ok = app
+    let choice = app
         .dialog()
         .message(text)
-        .title("アップデート")
+        .title(format!("{name} の新しいバージョンがあります"))
         .kind(MessageDialogKind::Info)
-        .buttons(MessageDialogButtons::OkCancelCustom("更新して再起動".into(), "あとで".into()))
-        .blocking_show();
-    if !ok {
-        return;
+        .buttons(buttons)
+        .blocking_show_with_result();
+    match choice {
+        MessageDialogResult::Custom(c) if c == INSTALL => {}
+        MessageDialogResult::Custom(c) if c == NOTES => {
+            open_release_page(&update.version);
+            return Some(update.version);
+        }
+        _ => return Some(update.version),
     }
 
     let mut done = 0u64;
@@ -139,17 +169,29 @@ fn offer(app: &AppHandle, update: Update) {
         || set_menu(app, "アップデートをインストールしています…", false),
     ));
     if let Err(e) = result {
-        show(app, MessageDialogKind::Error, format!("アップデートに失敗しました。\n{e}"));
-        return;
+        show(
+            app,
+            MessageDialogKind::Error,
+            format!("アップデートに失敗しました。もう一度試すか、GitHub から新しい版を入れてください。\n\n{e}"),
+        );
+        return Some(update.version);
     }
     // Windows: the installer has already been started and this process asked
     // to exit by now. macOS: the .app was swapped in place; restart into it.
     app.restart();
 }
 
+/// The version's release page (what changed) in the browser.
+fn open_release_page(version: &str) {
+    if let Err(e) = tauri_plugin_opener::open_url(format!("{RELEASE_PAGE}{version}"), None::<&str>) {
+        log::warn!("release page: {e}");
+    }
+}
+
 fn show(app: &AppHandle, kind: MessageDialogKind, text: String) {
     bring_to_front(app);
-    app.dialog().message(text).title("アップデート").kind(kind).buttons(MessageDialogButtons::Ok).blocking_show();
+    let title = format!("{} のアップデート", app.package_info().name);
+    app.dialog().message(text).title(title).kind(kind).buttons(MessageDialogButtons::Ok).blocking_show();
 }
 
 fn set_menu(app: &AppHandle, text: &str, enabled: bool) {

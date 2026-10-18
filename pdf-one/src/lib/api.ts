@@ -171,6 +171,8 @@ export const api = {
   textFontFamily: () => invoke<string | null>("text_font_family"),
   systemProxy: (url: string) => invoke<string | null>("system_proxy", { url }),
   revealLog: () => invoke<void>("reveal_log"),
+  /** The GitHub release page of `version` (what changed), in the browser. */
+  openReleasePage: (version: string) => invoke<void>("open_release_page", { version }),
   revealBackups: () => invoke<void>("reveal_backups"),
   revealFile: (path: string) => invoke<void>("reveal_file", { path }),
   takeOpenRequests: () => invoke<string[]>("take_open_requests"),

@@ -44,6 +44,7 @@ pub fn with_commands<R: Runtime>(builder: tauri::Builder<R>) -> tauri::Builder<R
         set_app_settings,
         system_proxy,
         reveal_log,
+        open_release_page,
         add_paths,
         clear_files,
         list_files,
