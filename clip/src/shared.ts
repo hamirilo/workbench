@@ -4,7 +4,20 @@ export type Snippet = { id: number; label: string; text: string };
 export type HistoryItem = { id: number; text: string; copiedAt: number };
 export type Entries = { snippets: Snippet[]; history: HistoryItem[] };
 export type Status = { autoPaste: boolean; shortcut: string; shortcutActive: boolean; version: string };
-export type Settings = { recordHistory: boolean; historyLimit: number; historyDays: number; shortcut: string };
+export type Settings = {
+  recordHistory: boolean;
+  historyLimit: number;
+  historyDays: number;
+  shortcut: string;
+  autoUpdate: boolean;
+};
+/** Same as `update::UpdateState`: what the settings' "アップデート" section shows. */
+export type UpdateState =
+  | { state: "idle" | "checking" | "latest" }
+  | { state: "available"; version: string }
+  | { state: "installing"; percent: number | null }
+  | { state: "error"; message: string }
+  | { state: "failed"; version: string; message: string };
 
 export const isMac = navigator.userAgent.includes("Mac");
 /** The modifier for Clip's own keys: ⌘ on macOS, Ctrl on Windows. */
@@ -27,6 +40,11 @@ export const api = {
   closePopup: () => invoke<void>("close_popup"),
   openManager: () => invoke<void>("open_manager"),
   requestAccessibility: () => invoke<void>("request_accessibility"),
+  updateState: () => invoke<UpdateState>("update_state"),
+  checkUpdate: () => invoke<void>("check_update"),
+  installUpdate: () => invoke<void>("install_update"),
+  /** That version's GitHub release page; this version's without one. */
+  openReleasePage: (version?: string) => invoke<void>("open_release_page", { version: version ?? null }),
 };
 
 /** "Ctrl+Alt+C" as it is written on each system: ⌃⌥C on macOS. */

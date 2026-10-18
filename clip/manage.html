@@ -10,7 +10,7 @@
   <body class="manage">
     <nav class="tabs">
       <button class="tab" data-tab="snippets">スニペット</button>
-      <button class="tab" data-tab="settings">設定</button>
+      <button class="tab" data-tab="settings">設定<span id="update-dot" class="tab-dot" title="新しいバージョンがあります" hidden></span></button>
       <span id="open-hint" class="open-hint"></span>
     </nav>
 
@@ -59,36 +59,88 @@
     </section>
 
     <section id="tab-settings" class="settings-tab" hidden>
-      <div class="setting">
-        <label for="shortcut">呼び出すショートカット</label>
-        <select id="shortcut"></select>
-        <p id="shortcut-warning" class="warning" hidden></p>
-      </div>
+      <div class="settings-page">
+        <p id="settings-error" class="warning" hidden></p>
 
-      <div class="setting">
-        <label class="check"><input id="record" type="checkbox" /> コピーの履歴を記録する</label>
-        <p class="muted">パスワード管理ソフトなど、記録しないよう印を付けてコピーしたものは記録しません。テキストだけを記録します。</p>
-      </div>
+        <section class="settings-section">
+          <h2>呼び出すショートカット</h2>
+          <div id="shortcuts" class="rows"></div>
+          <p id="shortcut-warning" class="warning section-note" hidden></p>
+        </section>
 
-      <div class="setting row-setting">
-        <label for="limit">残す件数</label>
-        <select id="limit"></select>
-        <label for="days">残す期間</label>
-        <select id="days"></select>
-      </div>
+        <section class="settings-section">
+          <h2>コピーの履歴</h2>
+          <div class="rows">
+            <label class="s-row clickable" for="record">
+              <span class="s-text">
+                <span class="s-label">コピーの履歴を記録する</span>
+                <span class="s-hint">パスワード管理ソフトなど、記録しないよう印を付けてコピーしたものは記録しません。テキストだけを記録します。</span>
+              </span>
+              <button id="record" type="button" role="switch" aria-checked="false" class="switch"></button>
+            </label>
+            <div class="s-row">
+              <span class="s-text"><label for="limit" class="s-label">残す件数</label></span>
+              <select id="limit"></select>
+            </div>
+            <div class="s-row">
+              <span class="s-text"><label for="days" class="s-label">残す期間</label></span>
+              <select id="days"></select>
+            </div>
+            <div class="s-row">
+              <span class="s-text">
+                <span class="s-label">履歴を消去</span>
+                <span class="s-hint">スニペットは消えません</span>
+              </span>
+              <button id="clear-history" type="button" class="button small">消去…</button>
+            </div>
+          </div>
+        </section>
 
-      <div class="setting">
-        <button id="clear-history" class="button">履歴を消去…</button>
-      </div>
+        <section id="accessibility" class="settings-section" hidden>
+          <h2>自動で入力</h2>
+          <div class="rows">
+            <div class="s-row">
+              <span class="s-text">
+                <span class="s-label">アクセシビリティの許可</span>
+                <span id="accessibility-status" class="s-hint"></span>
+              </span>
+              <button id="allow" type="button" class="button small">許可する…</button>
+            </div>
+          </div>
+        </section>
 
-      <div id="accessibility" class="setting" hidden>
-        <label>自動で入力</label>
-        <p id="accessibility-status" class="muted"></p>
-        <button id="allow" class="button">許可する…</button>
+        <section id="update" class="settings-section">
+          <h2>アップデート</h2>
+          <div class="rows">
+            <div class="s-row">
+              <img class="app-icon" src="/src-tauri/icons/128x128@2x.png" alt="" draggable="false" />
+              <span class="s-text">
+                <span class="s-label"><strong>Clip</strong> <span id="version" class="muted"></span></span>
+                <span id="update-status" class="s-hint"></span>
+              </span>
+              <span class="s-actions">
+                <button id="release-notes" type="button" class="button small" hidden>更新内容 ↗</button>
+                <button id="install-update" type="button" class="button small primary" hidden>更新して再起動</button>
+                <button id="check-update" type="button" class="button small">アップデートを確認</button>
+              </span>
+            </div>
+            <label class="s-row clickable" for="auto-update">
+              <span class="s-text">
+                <span class="s-label">アップデートを自動で確認する</span>
+                <span class="s-hint">起動して少したってからと、そのあと 1 日に 1 回確認し、新しいバージョンがあるときだけ知らせます</span>
+              </span>
+              <button id="auto-update" type="button" role="switch" aria-checked="true" class="switch"></button>
+            </label>
+            <div class="s-row">
+              <span class="s-text">
+                <span class="s-label">このバージョンの更新内容</span>
+                <span class="s-hint">GitHub のリリースのページを開きます</span>
+              </span>
+              <button id="this-release" type="button" class="button small">GitHub で見る ↗</button>
+            </div>
+          </div>
+        </section>
       </div>
-
-      <p id="settings-error" class="warning" hidden></p>
-      <p id="version" class="version muted"></p>
     </section>
   </body>
 </html>

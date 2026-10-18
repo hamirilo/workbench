@@ -47,11 +47,19 @@ pub struct Settings {
     pub history_limit: usize,
     pub history_days: u32,
     pub shortcut: String,
+    /// Whether to check for a new version on its own (Platform Distribution §4).
+    pub auto_update: bool,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { record_history: true, history_limit: 200, history_days: 30, shortcut: SHORTCUTS[0].into() }
+        Self {
+            record_history: true,
+            history_limit: 200,
+            history_days: 30,
+            shortcut: SHORTCUTS[0].into(),
+            auto_update: true,
+        }
     }
 }
 
@@ -405,6 +413,23 @@ mod tests {
         assert_eq!(settings.history_days, 30);
         assert_eq!(settings.shortcut, SHORTCUTS[0]);
         assert!(!settings.record_history);
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn reads_settings_saved_before_auto_update() {
+        let dir = temp_dir("settings-0.1");
+        fs::write(
+            dir.join(SETTINGS),
+            r#"{"recordHistory":false,"historyLimit":100,"historyDays":7,"shortcut":"Ctrl+Alt+V"}"#,
+        )
+        .unwrap();
+        let settings = Store::load(dir.clone()).settings();
+        assert!(settings.auto_update);
+        assert!(!settings.record_history);
+        assert_eq!(settings.history_limit, 100);
+        assert_eq!(settings.history_days, 7);
+        assert_eq!(settings.shortcut, "Ctrl+Alt+V");
         fs::remove_dir_all(dir).unwrap();
     }
 }
