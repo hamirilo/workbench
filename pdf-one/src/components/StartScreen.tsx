@@ -1,6 +1,7 @@
 import { CircleHelp, Clock, FileText, FolderOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { baseName, openPaths } from "../lib/actions";
+import { host } from "../host";
 import { api } from "../lib/api";
 import { command, runCommand } from "../lib/commands";
 import { comboText } from "../lib/keys";
@@ -29,7 +30,7 @@ export function StartScreen() {
             <span className="text-xs opacity-80">{comboText(open.keys![0])}</span>
           </button>
         </div>
-        {recent.length > 0 && (
+        {host().can.recent && recent.length > 0 && (
           <section aria-label="最近使ったファイル">
             <div className="mb-2 flex items-center gap-1.5 text-xs text-dim">
               <Clock size={12} />

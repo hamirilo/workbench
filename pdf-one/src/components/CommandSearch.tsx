@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { COMMANDS, isEnabled, plainTitle, runCommand, type Command } from "../lib/commands";
+import { COMMANDS, isAvailable, isEnabled, plainTitle, runCommand, type Command } from "../lib/commands";
 import { comboText } from "../lib/keys";
 import { useStore } from "../store";
 
@@ -34,7 +34,7 @@ export function CommandSearch({ onPick }: { onPick?: (id: string) => void }) {
   const q = norm(query);
   const found = useMemo(() => {
     if (!q) return [];
-    const all = COMMANDS.filter((c) => !HIDDEN.test(c.id) && matches(c, q));
+    const all = COMMANDS.filter((c) => isAvailable(c) && !HIDDEN.test(c.id) && matches(c, q));
     // Usable ones first, then by how early the word matches the name.
     return all
       .map((c) => ({ c, on: isEnabled(c, s), at: norm(c.title).indexOf(q) }))

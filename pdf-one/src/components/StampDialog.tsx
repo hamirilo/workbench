@@ -1,8 +1,8 @@
-import { open } from "@tauri-apps/plugin-dialog";
 import { CalendarCheck, ClipboardPaste, ImagePlus, Plus, Signature, X } from "lucide-react";
 import { useSealDialog } from "./SealDialog";
 import { useCallback, useEffect, useState } from "react";
 import { chooseImage, placePicture } from "../lib/actions";
+import { host } from "../host";
 import { api, type ImageInfo, type Stamp } from "../lib/api";
 import { imageUrl } from "../lib/images";
 import { isMac } from "../lib/keys";
@@ -45,13 +45,13 @@ export function StampDialog() {
   useEffect(() => void load(), [load]);
 
   const add = async () => {
-    const picked = await open({
+    const picked = await host().dialogs.openFiles({
       multiple: true,
       title: "ライブラリに加える画像",
       filters: [{ name: "画像（PNG・JPEG）", extensions: ["png", "jpg", "jpeg", "PNG", "JPG", "JPEG"] }],
     }).catch(() => null);
     if (!picked) return;
-    for (const p of Array.isArray(picked) ? picked : [picked]) {
+    for (const p of picked) {
       await api.addStamp(p).catch((e) => st().toast(String(e), true));
     }
     void load();

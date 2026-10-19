@@ -19,7 +19,7 @@ PDF を見る・ページを整理する・書き込む・フォームに入力�
 - 元のファイルを黙って書き換えない。保存は一時ファイルからの入れ替えとバックアップ（`files.rs`）を通す
 - テキストボックスの折り返しはフロント（`src/lib/text.ts`）で決めて `Annot.lines` で送る。行の高さと余白の定数は `annots.rs` と同じ値にする
 - 操作はコマンド表 `src/lib/commands.ts` にまず足す
-- Rust コマンドは `src/lib/api.ts` のラッパ経由で呼ぶ。モック `src/dev/mockBackend.ts` も同じ PR で更新する
+- Rust コマンドは `src/lib/api.ts` のラッパ経由で呼ぶ。画面は Tauri やブラウザの API を直接呼ばず、ホスト（`src/host/`、[ADR-0004](decisions/adr-0004-host-layer.md)）を通す：コマンドは `Backend`、ダイアログは `host().dialogs`、できないことは `host().can` を見て出さない。コマンドを足したら `host/desktop.ts`・`host/web/`・モック `src/dev/mockHost.ts` も同じ PR で更新する
 - pdf.js は legacy ビルドを使う（`vite.config.ts` の alias）。OS の WebView（古い macOS の Safari）で動かすため
 
 ## コマンド
@@ -27,8 +27,8 @@ PDF を見る・ページを整理する・書き込む・フォームに入力�
 ```bash
 npm install
 npm run tauri dev      # アプリを起動
-npm run dev            # ブラウザで UI だけ（モック）
-npm run build:wasm     # 保存の処理を WebAssembly に。npm run dev のあと ?backend=wasm で本物の PDF（docs/WASM.md）
+npm run build:wasm     # 保存の処理を WebAssembly に（docs/WASM.md）。ブラウザ版に要る
+npm run dev            # ブラウザで開く。既定はブラウザ版（本物の PDF）。?backend=mock で見本（wasm 無しで画面だけ）
 npm test               # cargo test + tsc --noEmit
 npm run lint
 npm run tauri build    # 配布用ビルド（署名鍵が要る。README「リリース」）

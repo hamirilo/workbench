@@ -2,6 +2,7 @@ import { FilePlus2, FolderOpen, Save } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { revealLabel, splitDocument } from "../lib/actions";
+import { host } from "../host";
 import { api } from "../lib/api";
 import { runCommand } from "../lib/commands";
 import { setPasswordPrompt } from "../lib/pdfjs";
@@ -31,7 +32,9 @@ export function SplitDialog() {
         ページずつ、別のファイルにする
       </label>
       <p className="mt-2 text-xs text-dim">
-        全 {d.pages.length} ページが {files} 個のファイルになります。保存するフォルダを次に選びます。元のファイルは変わりません。
+        全 {d.pages.length} ページが {files} 個のファイルになります。
+        {host().can.folders ? "保存するフォルダを次に選びます。" : "ファイルは 1 つずつダウンロードされます。"}
+        元のファイルは変わりません。
       </p>
       <div className="mt-5 flex justify-end gap-2">
         <button onClick={close} className="rounded-md px-3 py-1.5 hover:bg-hover">
@@ -44,7 +47,7 @@ export function SplitDialog() {
           }}
           className="rounded-md bg-accent px-4 py-1.5 text-white hover:brightness-110"
         >
-          分割する…
+          {host().can.folders ? "分割する…" : "分割する"}
         </button>
       </div>
     </Modal>

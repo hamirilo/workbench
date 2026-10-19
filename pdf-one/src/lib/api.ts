@@ -1,7 +1,9 @@
-// Typed wrappers around the Rust commands in src-tauri/src/commands.rs.
-// Components call these, never `invoke` directly; the browser mock
-// (src/dev/mockBackend.ts) answers the same names.
-import { invoke } from "@tauri-apps/api/core";
+// The commands the screens call (src-tauri/src/commands.rs in the desktop
+// app) and their types. Components call `api`, never `invoke` directly; it
+// hands every call to the host's backend (src/host/), so the desktop app,
+// the browser version and the mock (src/dev/mockHost.ts) answer the same names.
+import { host } from "../host";
+import type { Backend } from "../host";
 
 /** settings.json (src-tauri/src/settings.rs). */
 export interface AppSettings {
@@ -161,42 +163,35 @@ export interface Draft {
   images: [number, string][];
 }
 
-const bytes = (r: ArrayBuffer | Uint8Array | number[]) =>
-  r instanceof Uint8Array ? r : r instanceof ArrayBuffer ? new Uint8Array(r) : new Uint8Array(r);
+export const api: Backend = {
+  getAppSettings: () => host().backend.getAppSettings(),
+  setAppSettings: (settings) => host().backend.setAppSettings(settings),
+  osUserName: () => host().backend.osUserName(),
+  textFontFamily: () => host().backend.textFontFamily(),
+  systemProxy: (url) => host().backend.systemProxy(url),
+  revealLog: () => host().backend.revealLog(),
+  openReleasePage: (version) => host().backend.openReleasePage(version),
+  revealBackups: () => host().backend.revealBackups(),
+  revealFile: (path) => host().backend.revealFile(path),
+  takeOpenRequests: () => host().backend.takeOpenRequests(),
 
-export const api = {
-  getAppSettings: () => invoke<AppSettings>("get_app_settings"),
-  setAppSettings: (settings: AppSettings) => invoke<AppSettings>("set_app_settings", { settings }),
-  osUserName: () => invoke<string>("os_user_name"),
-  textFontFamily: () => invoke<string | null>("text_font_family"),
-  systemProxy: (url: string) => invoke<string | null>("system_proxy", { url }),
-  revealLog: () => invoke<void>("reveal_log"),
-  /** The GitHub release page of `version` (what changed), in the browser. */
-  openReleasePage: (version: string) => invoke<void>("open_release_page", { version }),
-  revealBackups: () => invoke<void>("reveal_backups"),
-  revealFile: (path: string) => invoke<void>("reveal_file", { path }),
-  takeOpenRequests: () => invoke<string[]>("take_open_requests"),
+  openPdf: (path) => host().backend.openPdf(path),
+  pdfViewBytes: (id) => host().backend.pdfViewBytes(id),
+  closePdf: (id) => host().backend.closePdf(id),
+  savePdf: (request) => host().backend.savePdf(request),
+  textLines: (id, index) => host().backend.textLines(id, index),
+  composePdf: (request) => host().backend.composePdf(request),
 
-  openPdf: (path: string) => invoke<OpenedPdf>("open_pdf", { path }),
-  /** What pdf.js shows for document `id`; can be fetched once. */
-  pdfViewBytes: async (id: number) => bytes(await invoke<ArrayBuffer>("pdf_view_bytes", { id })),
-  closePdf: (id: number) => invoke<void>("close_pdf", { id }),
-  savePdf: (request: { path: string; pages: PageSpec[]; forms: FormEntry[] }) => invoke<Saved>("save_pdf", { request }),
-  /** The file as it would be saved, as bytes (printing). */
-  textLines: (id: number, index: number) => invoke<TextLine[]>("text_lines", { id, index }),
-  composePdf: async (request: { pages: PageSpec[]; forms: FormEntry[] }) => bytes(await invoke<ArrayBuffer>("compose_pdf", { request })),
+  addImage: (path) => host().backend.addImage(path),
+  addImageBytes: (data) => host().backend.addImageBytes(data),
+  imageBytes: (id) => host().backend.imageBytes(id),
+  listStamps: () => host().backend.listStamps(),
+  addStamp: (path) => host().backend.addStamp(path),
+  addStampBytes: (data) => host().backend.addStampBytes(data),
 
-  addImage: (path: string) => invoke<ImageInfo>("add_image", { path }),
-  addImageBytes: (data: Uint8Array) => invoke<ImageInfo>("add_image_bytes", data),
-  imageBytes: async (id: number) => bytes(await invoke<ArrayBuffer>("image_bytes", { id })),
-  listStamps: () => invoke<Stamp[]>("list_stamps"),
-  addStamp: (path: string) => invoke<Stamp>("add_stamp", { path }),
-  /** A picture drawn in the app (a signature), as PNG bytes, into the library. */
-  addStampBytes: (data: Uint8Array) => invoke<Stamp>("add_stamp_bytes", data),
-
-  writeDraft: (request: { path: string; json: string; images: number[] }) => invoke<string>("write_draft", { request }),
-  listDrafts: () => invoke<Draft[]>("list_drafts"),
-  removeDraft: (id: string) => invoke<void>("remove_draft", { id }),
-  removeStamp: (id: string) => invoke<void>("remove_stamp", { id }),
-  useStamp: (id: string) => invoke<ImageInfo>("use_stamp", { id }),
+  writeDraft: (request) => host().backend.writeDraft(request),
+  listDrafts: () => host().backend.listDrafts(),
+  removeDraft: (id) => host().backend.removeDraft(id),
+  removeStamp: (id) => host().backend.removeStamp(id),
+  useStamp: (id) => host().backend.useStamp(id),
 };

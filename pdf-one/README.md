@@ -106,7 +106,8 @@ PDF をダブルクリックで開きたいときは、PDF の「プログラム
 ```bash
 npm install
 npm run tauri dev      # アプリを起動
-npm run dev            # ブラウザで UI だけ（モック。src/dev/mockBackend.ts。どのファイルを開いても同じ見本）
+npm run build:wasm     # 保存の処理を WebAssembly に（ブラウザ版に要る。docs/WASM.md）
+npm run dev            # ブラウザで開く（ブラウザ版）。?backend=mock で見本（src/dev/mockHost.ts。どのファイルを開いても同じ見本）
 npm test               # cargo test + tsc --noEmit
 npm run lint           # eslint + cargo fmt --check + clippy
 cargo run --example sample --manifest-path src-tauri/Cargo.toml -- <in.pdf|-> <out.pdf> [画像.png]   # 注釈を 1 つずつ書いた PDF を作る（ほかのビューアでの見え方の確認用）

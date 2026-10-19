@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { host } from "../host";
 import { api, type AppSettings } from "../lib/api";
 import { useStore } from "../store";
 import { Row, Section, SettingsFrame, type SettingsGroup } from "./SettingsFrame";
@@ -85,10 +86,12 @@ export function SettingsDialog() {
         />
       </Section>
 
-      <UpdateSection
-        autoUpdate={settings?.autoUpdate}
-        onAutoUpdate={(autoUpdate) => settings && change({ ...settings, autoUpdate })}
-      />
+      {host().can.updates && (
+        <UpdateSection
+          autoUpdate={settings?.autoUpdate}
+          onAutoUpdate={(autoUpdate) => settings && change({ ...settings, autoUpdate })}
+        />
+      )}
     </SettingsFrame>
   );
 }

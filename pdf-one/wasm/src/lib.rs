@@ -3,7 +3,7 @@
 //! Each function stands for one Tauri command of src-tauri/src/commands.rs,
 //! minus the files: the page hands over bytes and gets bytes back. The
 //! documents and pictures stay here between calls, as in `AppState`.
-//! src/dev/wasmBackend.ts answers the app's commands with these.
+//! src/host/web/ answers the app's commands with these.
 
 #[allow(dead_code)]
 #[path = "../../src-tauri/src/pdf/mod.rs"]

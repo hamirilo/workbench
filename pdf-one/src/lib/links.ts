@@ -3,9 +3,9 @@
  * IPDFLinkService): links inside the document go to the page, web links
  * open in the browser after asking.
  */
-import { ask } from "@tauri-apps/plugin-dialog";
 import { isTauri } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { host } from "../host";
 import { warn } from "./log";
 import { getSource } from "./pdfjs";
 import { activeDoc, useStore } from "../store";
@@ -53,7 +53,7 @@ async function openExternal(url: string) {
     window.open(url, "_blank", "noopener");
     return;
   }
-  const ok = await ask(`このリンクをブラウザで開きますか？\n\n${url}`, { title: "リンク", okLabel: "開く", cancelLabel: "キャンセル" });
+  const ok = await host().dialogs.ask(`このリンクをブラウザで開きますか？\n\n${url}`, { title: "リンク", okLabel: "開く", cancelLabel: "キャンセル" });
   if (ok) await openUrl(url).catch((e) => st().toast(`開けませんでした: ${e}`, true));
 }
 

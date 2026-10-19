@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { ContextMenu } from "./components/ContextMenu";
 import { DetailsPanel } from "./components/DetailsPanel";
 import { PasswordDialog, SaveChoiceDialog, SplitDialog } from "./components/Dialogs";
+import { PromptDialog } from "./host/web/prompt";
 import { PrintDialog } from "./components/PrintDialog";
 import { checkDrafts, RecoverDialog } from "./components/RecoverDialog";
 import { DropOverlay, useFileDrop } from "./components/DropZone";
@@ -150,6 +151,7 @@ export default function App() {
       {dialog === "help" && <HelpDialog />}
       <SaveChoiceDialog />
       <PasswordDialog />
+      <PromptDialog />
       <ContextMenu />
       {dropping && <DropOverlay />}
       <Toasts />

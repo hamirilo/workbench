@@ -64,6 +64,7 @@ import {
   rotateTarget,
   save,
 } from "./actions";
+import { host } from "../host";
 import { api } from "./api";
 import { addAnnot, moved, updateAnnot } from "./edit";
 import { comboMatches, fromField } from "./keys";
@@ -87,11 +88,16 @@ export interface Command {
   /** Other words people type to find it (何をしますか). */
   words?: string[];
   enabled?: (s: S) => boolean;
+  /** False where the host can't do it (src/host/): the command isn't offered at all. */
+  available?: () => boolean;
   checked?: (s: S) => boolean;
   run: (s: S) => void;
   /** Who handles the key: the page's handler (default), or only the menu bar's accelerator. */
   keyBy?: "page" | "menu";
 }
+
+const canReveal = () => host().can.reveal;
+const canUpdate = () => host().can.updates;
 
 const hasDoc = (s: S) => activeDoc(s) !== null;
 const editable = (s: S) => {
@@ -189,6 +195,7 @@ export const COMMANDS: Command[] = [
     id: "file.backups",
     title: "バックアップのフォルダを開く",
     words: ["前の版", "戻す", "上書き前"],
+    available: canReveal,
     run: (s) => void api.revealBackups().catch((e) => s.toast(String(e), true)),
   },
 
@@ -413,11 +420,11 @@ export const COMMANDS: Command[] = [
   },
 
   { id: "app.settings", title: "設定…", keys: ["Mod+,"], words: ["名前", "作成者", "文字の大きさ", "大きく", "アップデート"], run: (s) => s.openDialog("settings") },
-  { id: "app.checkUpdate", title: "アップデートを確認…", words: ["更新", "新しいバージョン"], run: () => void checkForUpdate(true) },
-  { id: "help.releaseNotes", title: "このバージョンの更新内容", words: ["リリースノート", "新しい機能", "変更点"], run: () => openReleaseNotes() },
+  { id: "app.checkUpdate", title: "アップデートを確認…", words: ["更新", "新しいバージョン"], available: canUpdate, run: () => void checkForUpdate(true) },
+  { id: "help.releaseNotes", title: "このバージョンの更新内容", words: ["リリースノート", "新しい機能", "変更点"], available: canUpdate, run: () => openReleaseNotes() },
   // Windows' ヘルプ menu (macOS has the system's about panel in the app menu):
   // the settings' アップデート section shows the app, its version and updates.
-  { id: "help.about", title: "PDF One について", words: ["バージョン", "情報"], run: (s) => s.openDialog("settings") },
+  { id: "help.about", title: "PDF One について", words: ["バージョン", "情報"], available: canUpdate, run: (s) => s.openDialog("settings") },
   {
     id: "help.guide",
     title: "使い方",
@@ -430,6 +437,7 @@ export const COMMANDS: Command[] = [
   {
     id: "help.log",
     title: "ログを表示",
+    available: canReveal,
     run: (s) => void api.revealLog().catch((e) => s.toast(`ログを開けませんでした: ${e}`, true)),
   },
 ];
@@ -445,7 +453,9 @@ export function command(id: string): Command {
   return c;
 }
 
-export const isEnabled = (c: Command, s: S) => c.enabled?.(s) ?? true;
+export const isAvailable = (c: Command) => c.available?.() ?? true;
+
+export const isEnabled = (c: Command, s: S) => isAvailable(c) && (c.enabled?.(s) ?? true);
 
 export const labelOf = (c: Command, s: S) => c.label?.(s) ?? c.title;
 

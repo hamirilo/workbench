@@ -1,6 +1,6 @@
 // Files the browser handed over (the file chooser, a drop), for running
 // outside Tauri (docs/WASM.md). The app passes files around by path, so each
-// one gets a made-up path; src/dev/wasmBackend.ts reads them back by it.
+// one gets a made-up path; the browser host (src/host/web/) reads them back by it.
 
 const files = new Map<string, File>();
 let next = 0;

@@ -1,7 +1,7 @@
 // Operations that go through Rust or the OS dialogs and then report back
 // (commands.ts calls these; so do the toolbar, the start screen and the drop
 // handler).
-import { message, open, save as saveDialog } from "@tauri-apps/plugin-dialog";
+import { host } from "../host";
 import { api, type Annot, type FormEntry, type OpenedPdf, type PageSpec } from "./api";
 import { insertPages, movePages, removePages, rotatePages, type Snap } from "./edit";
 import { readingSize } from "./geometry";
@@ -19,6 +19,14 @@ const st = () => useStore.getState();
 const doc = () => activeDoc(st());
 
 export const revealLabel = isMac ? "Finder で表示" : "エクスプローラーで表示";
+
+/** The toast button that shows `path` in the file manager, where the host can. */
+const revealAction = (path: string) =>
+  host().can.reveal ? { label: revealLabel, onClick: () => void api.revealFile(path).catch(() => {}) } : undefined;
+
+const SAVE = "保存";
+const DONT = "保存しない";
+const CANCEL = "キャンセル";
 
 const PDF_FILTER = [{ name: "PDF", extensions: ["pdf", "PDF"] }];
 const IMAGE_FILTER = [{ name: "画像（PNG・JPEG）", extensions: ["png", "jpg", "jpeg", "PNG", "JPG", "JPEG"] }];
@@ -137,8 +145,8 @@ async function describeOnOpen(src: Source) {
 /** ⌘O */
 export async function chooseAndOpen() {
   try {
-    const picked = await open({ multiple: true, filters: PDF_FILTER, title: "PDF を開く" });
-    if (picked) await openPaths(Array.isArray(picked) ? picked : [picked]);
+    const picked = await host().dialogs.openFiles({ multiple: true, filters: PDF_FILTER, title: "PDF を開く" });
+    if (picked) await openPaths(picked);
   } catch (e) {
     st().toast(String(e), true);
   }
@@ -194,7 +202,7 @@ const suggestedName = (d: Doc) => `${stem(d.openedPath)}_編集.pdf`;
 const suggested = (d: Doc) => d.savePath ?? `${dirName(d.openedPath)}${sep(d.openedPath)}${suggestedName(d)}`;
 
 async function askPath(title: string, defaultPath: string): Promise<string | null> {
-  const p = await saveDialog({ title, defaultPath, filters: PDF_FILTER });
+  const p = await host().dialogs.saveAs({ title, defaultPath, filters: PDF_FILTER });
   if (!p) return null;
   return /\.pdf$/i.test(p) ? p : `${p}.pdf`;
 }
@@ -203,7 +211,8 @@ async function askPath(title: string, defaultPath: string): Promise<string | nul
  * ⌘S writes where the tab was last saved. The first time it asks how (a
  * new file next to the original, or the original itself, docs/UX.md §8),
  * and for a new file where; ⌘⇧S always asks where. Whatever is overwritten
- * is kept in the backups (Rust).
+ * is kept in the backups (Rust). A host that can't overwrite (the browser)
+ * doesn't ask: it saves the suggested name, as a download.
  */
 export async function save(as = false, key?: string): Promise<boolean> {
   const d = key ? st().docs.find((x) => x.key === key) : doc();
@@ -214,21 +223,23 @@ export async function save(as = false, key?: string): Promise<boolean> {
   }
   let path = d.savePath;
   if (!as && !path) {
-    const choice = await askSaveChoice(d.name, suggestedName(d));
-    if (!choice) return false;
-    if (choice === "overwrite") path = d.openedPath;
+    if (host().can.overwrite) {
+      const choice = await askSaveChoice(d.name, suggestedName(d));
+      if (!choice) return false;
+      if (choice === "overwrite") path = d.openedPath;
+    } else path = suggestedName(d);
   }
   if (as || !path) {
     path = await askPath(as ? "名前を付けて保存" : "保存", suggested(d)).catch(() => null);
     if (!path) return false;
   }
   if (d.signed) {
-    const ok = await message("この PDF には電子署名があります。保存すると署名は無効になります。保存しますか？", {
+    const ok = await host().dialogs.message("この PDF には電子署名があります。保存すると署名は無効になります。保存しますか？", {
       title: "電子署名",
       kind: "warning",
-      buttons: { ok: "保存", cancel: "キャンセル" },
+      buttons: [SAVE, CANCEL],
     });
-    if (ok !== "保存" && ok !== "Ok") return false;
+    if (ok !== SAVE) return false;
   }
   const started = Date.now();
   st().setBusy("保存しています…");
@@ -240,7 +251,7 @@ export async function save(as = false, key?: string): Promise<boolean> {
       title: "保存しました",
       detail: r.backup ? `${r.path}\n上書きする前の版はバックアップに残しました。` : r.path,
       kind: "success",
-      action: { label: revealLabel, onClick: () => void api.revealFile(r.path).catch(() => {}) },
+      action: revealAction(r.path),
     });
     notifyIfAway(started, "保存しました", baseName(r.path));
     return true;
@@ -278,7 +289,7 @@ export async function extractPages() {
       title: `${uids.length} ページを抜き出しました`,
       detail: r.path,
       kind: "success",
-      action: { label: revealLabel, onClick: () => void api.revealFile(r.path).catch(() => {}) },
+      action: revealAction(r.path),
     });
   } catch (e) {
     st().notify({ title: "抜き出せませんでした", detail: String(e), kind: "error" });
@@ -291,8 +302,13 @@ export async function extractPages() {
 export async function splitDocument(every: number) {
   const d = doc();
   if (!d || d.readOnly || every < 1) return;
-  const folder = await open({ directory: true, title: "分割したファイルを保存するフォルダ" }).catch(() => null);
-  if (typeof folder !== "string") return;
+  // Without folders (the browser) each file is a download of its own.
+  let folder = "";
+  if (host().can.folders) {
+    const picked = await host().dialogs.openFolder({ title: "分割したファイルを保存するフォルダ" }).catch(() => null);
+    if (!picked) return;
+    folder = picked;
+  }
   const started = Date.now();
   const forms = formValues(d);
   let made = 0;
@@ -303,14 +319,14 @@ export async function splitDocument(every: number) {
       const b = i + chunk.length;
       st().setBusy(`分割しています…（${a}〜${b} / ${d.pages.length} ページ）`);
       const name = a === b ? `${stem(d.name)}_p${a}.pdf` : `${stem(d.name)}_p${a}-${b}.pdf`;
-      await api.savePdf({ path: `${folder}${sep(folder)}${name}`, pages: buildPages(d, new Set(chunk.map((p) => p.uid))), forms });
+      await api.savePdf({ path: folder ? `${folder}${sep(folder)}${name}` : name, pages: buildPages(d, new Set(chunk.map((p) => p.uid))), forms });
       made++;
     }
     st().notify({
       title: `${made} 個のファイルに分けました`,
-      detail: folder,
+      detail: folder || "ダウンロードしました",
       kind: "success",
-      action: { label: revealLabel, onClick: () => void api.revealFile(folder).catch(() => {}) },
+      action: folder ? revealAction(folder) : undefined,
     });
     notifyIfAway(started, "分割が終わりました", `${made} 個のファイル`);
   } catch (e) {
@@ -322,21 +338,17 @@ export async function splitDocument(every: number) {
 
 // ---------------------------------------------------------------- tabs
 
-const SAVE = "保存";
-const DONT = "保存しない";
-const CANCEL = "キャンセル";
-
 /** Asks about unsaved changes; false = the user cancelled. */
 async function settle(d: Doc): Promise<boolean> {
   if (!d.dirty || d.readOnly) return true;
   st().setActive(d.key);
-  const r = await message(`「${d.name}」の変更を保存しますか？\n保存しないと、変更は失われます。`, {
+  const r = await host().dialogs.message(`「${d.name}」の変更を保存しますか？\n保存しないと、変更は失われます。`, {
     title: "保存していない変更",
     kind: "warning",
-    buttons: { yes: SAVE, no: DONT, cancel: CANCEL },
+    buttons: [SAVE, DONT, CANCEL],
   });
-  if (r === SAVE || r === "Yes") return save(false, d.key);
-  const discard = r === DONT || r === "No";
+  if (r === SAVE) return save(false, d.key);
+  const discard = r === DONT;
   if (discard) void dropDraft(d.key);
   return discard;
 }
@@ -400,10 +412,9 @@ export function insertBlankPage() {
 export async function insertFromFiles(at?: number) {
   const d = doc();
   if (!d || d.readOnly) return;
-  const picked = await open({ multiple: true, filters: PDF_FILTER, title: "ページを足す PDF" }).catch(() => null);
+  const picked = await host().dialogs.openFiles({ multiple: true, filters: PDF_FILTER, title: "ページを足す PDF" }).catch(() => null);
   if (!picked) return;
-  const paths = Array.isArray(picked) ? picked : [picked];
-  await insertPaths(paths, at ?? d.page + 1);
+  await insertPaths(picked, at ?? d.page + 1);
 }
 
 export async function insertPaths(paths: string[], at: number) {
@@ -440,10 +451,10 @@ export function movePagesTo(uids: string[], to: number) {
 
 /** A picture from a file, for the image tool to put down. */
 export async function chooseImage() {
-  const picked = await open({ multiple: false, filters: IMAGE_FILTER, title: "画像を選ぶ" }).catch(() => null);
-  if (typeof picked !== "string") return;
+  const picked = await host().dialogs.openFiles({ filters: IMAGE_FILTER, title: "画像を選ぶ" }).catch(() => null);
+  if (!picked) return;
   try {
-    const img = await api.addImage(picked);
+    const img = await api.addImage(picked[0]);
     placePicture(img);
   } catch (e) {
     st().toast(String(e), true);
