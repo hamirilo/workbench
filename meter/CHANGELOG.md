@@ -38,4 +38,4 @@
 | macOS（Apple Silicon） | `.dmg` |
 | Windows | `-setup.exe` |
 
-初回は警告が出ます。手順は [README](https://github.com/jazmf-dx/desktop-apps/tree/main/meter#初回起動) を見てください。Windows 11 では、アイコンが最初は「^」の中に入ります（[出し方](https://github.com/jazmf-dx/desktop-apps/tree/main/meter#windowsアイコンをタスクバーに出す)）。
+初回は警告が出ます。手順は [README](https://github.com/hamirilo/workbench/tree/main/meter#初回起動) を見てください。Windows 11 では、アイコンが最初は「^」の中に入ります（[出し方](https://github.com/hamirilo/workbench/tree/main/meter#windowsアイコンをタスクバーに出す)）。

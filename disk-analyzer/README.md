@@ -48,7 +48,7 @@ Windows は ⌘ → Ctrl。
 
 ## インストール
 
-[Releases](https://github.com/jazmf-dx/desktop-apps/releases?q=disk-analyzer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
+[Releases](https://github.com/hamirilo/workbench/releases?q=disk-analyzer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
 
 - **Windows**：`-setup.exe` を実行 → SmartScreen が出たら「詳細情報」→「実行」
 - **macOS**：`.dmg` を開いて「アプリケーション」へコピー → 起動すると「開発元を検証できない」と出るので「完了」→ **システム設定 › プライバシーとセキュリティ** の下にある「このまま開く」。ターミナルで `xattr -dr com.apple.quarantine "/Applications/Disk Analyzer.app"` でもよい
@@ -99,7 +99,7 @@ Linux で Rust をビルドするには `libwebkit2gtk-4.1-dev` などが要る�
 
 ## リリース
 
-desktop-apps の決まり（リポジトリ直下の README「リポジトリの決まりごと」、Platform Optional「複数ツール同居リポジトリ」）に従う。
+workbench の決まり（リポジトリ直下の README「リポジトリの決まりごと」、Platform Optional「複数ツール同居リポジトリ」）に従う。
 
 1. バージョンを `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` の 3 か所で上げ、lockfile も更新する（`bun pm version X --no-git-tag-version`、`cargo update -p disk-analyzer --manifest-path src-tauri/Cargo.toml`）
 2. `CHANGELOG.md` に `## <version>` の節を書く（変更点 / ダウンロード / 注意。リリースの本文になる。アップデートのダイアログと設定の「更新内容」からこのページへ飛ぶ）
@@ -109,4 +109,4 @@ desktop-apps の決まり（リポジトリ直下の README「リポジトリの
 
 製品名に空白があるので、CI はリリースに載せるファイル名の空白を `_` に変える（GitHub が空白を `.` に変えて、`latest.json` の URL とずれるため）。
 
-署名鍵は desktop-apps の Secrets（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`。Shelf・Renamer と共有）。**`disk-analyzer-updater` のリリースと tag は消さない**（配布済みのアプリが更新を見つけられなくなる）。
+署名鍵は workbench の Secrets（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`。Shelf・Renamer と共有）。**`disk-analyzer-updater` のリリースと tag は消さない**（配布済みのアプリが更新を見つけられなくなる）。

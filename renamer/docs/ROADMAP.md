@@ -6,14 +6,14 @@
 
 ### M0 雛形 ✅
 
-**署名鍵**：desktop-apps に入れたので、desktop-apps の Secrets（Shelf と同じ鍵）で署名する。公開鍵は Shelf と同じ値を `pubkey` に入れた。
+**署名鍵**：workbench に入れたので、workbench の Secrets（Shelf と同じ鍵）で署名する。公開鍵は Shelf と同じ値を `pubkey` に入れた。
 
 
 - 雛形を置く。Platform の [新しいツールを作る](../../../desktop-platform/playbook/new-tool.md) §1「desktop-base がまだ無いとき」の表に従い、stockroom の `170b90c`（v0.17.0）から写す。写した commit は `decisions/project-context.md` にある
   - `identifier` は `dev.workbench.renamer`、`productName` は `Renamer`
   - stockroom 固有の文字列を直す：`src-tauri/src/proxy.rs` の PAC のモード名（`StockroomPAC`）と User-Agent、`src/lib/update.ts` の `FEED` と「最新版です」の文言、`tauri.conf.json` の `plugins.updater.endpoints`
   - 使わないものは写さない：ローカル受付（`loopback.rs`、`mcp/`、`webimport.rs`、`extension/`）、SQLite（`db.rs`、`library.rs`）、画像・フォント・PDF の処理、asset protocol
-- updater の署名鍵：desktop-apps の Secrets を使う（Shelf と共有）
+- updater の署名鍵：workbench の Secrets を使う（Shelf と共有）
 - `app-icon.svg` とアイコンの生成
 - plugin の配線：log、single-instance、window-state、dialog、opener、notification、process、updater
 - CSP、capabilities を使う分だけ

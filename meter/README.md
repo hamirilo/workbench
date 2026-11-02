@@ -55,7 +55,7 @@ CPU・メモリ・ディスク・ネットワークの使用状況を、タス�
 
 ## インストール
 
-[Releases](https://github.com/jazmf-dx/desktop-apps/releases?q=meter) から最新版をダウンロードしてください。
+[Releases](https://github.com/hamirilo/workbench/releases?q=meter) から最新版をダウンロードしてください。
 
 | OS | ファイル | 入れ方 |
 | --- | --- | --- |
@@ -205,9 +205,9 @@ Linux でもビルドとテストはできます。トレイは Windows と同�
 
 リリースには、インストーラのほかにアプリ内アップデート用のファイル（`Meter.app.tar.gz` と `.sig`、`-setup.exe` の `.sig`、`latest.json`）が添付されます。
 
-インストール済みのアプリは `https://github.com/jazmf-dx/desktop-apps/releases/download/meter-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、リリースのたびに `meter-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`meter-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
+インストール済みのアプリは `https://github.com/hamirilo/workbench/releases/download/meter-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、リリースのたびに `meter-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`meter-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
 
-更新ファイルの署名鍵は、desktop-apps の他のツールと共通の GitHub Actions の Secrets（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`）を使います。対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。
+更新ファイルの署名鍵は、workbench の他のツールと共通の GitHub Actions の Secrets（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`）を使います。対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。
 
 ## 今後の候補
 

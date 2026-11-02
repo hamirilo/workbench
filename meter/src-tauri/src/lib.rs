@@ -1,4 +1,5 @@
 mod badge;
+mod feed;
 mod format;
 mod login_item;
 mod monitor;

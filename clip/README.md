@@ -6,7 +6,7 @@
 
 ## インストール
 
-[Releases](https://github.com/jazmf-dx/desktop-apps/releases?q=clip) から最新版をダウンロードしてください。
+[Releases](https://github.com/hamirilo/workbench/releases?q=clip) から最新版をダウンロードしてください。
 
 | OS | ファイル | 入れ方 |
 | --- | --- | --- |
@@ -233,9 +233,9 @@ Linux でもビルドとテストはできますが、クリップボードと�
 
 ### アプリ内アップデートの仕組み
 
-インストール済みのアプリは `https://github.com/jazmf-dx/desktop-apps/releases/download/clip-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、`releases/latest` は使えません。そこでリリースのたびに、`clip-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`clip-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
+インストール済みのアプリは `https://github.com/hamirilo/workbench/releases/download/clip-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、`releases/latest` は使えません。そこでリリースのたびに、`clip-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`clip-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
 
-更新ファイルの署名鍵は、Shelf・Renamer と同じ desktop-apps の GitHub Actions の Secrets です（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`）。対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。
+更新ファイルの署名鍵は、Shelf・Renamer と同じ workbench の GitHub Actions の Secrets です（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`）。対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。
 
 ## 今後の候補
 

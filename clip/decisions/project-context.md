@@ -13,11 +13,11 @@ AI と人が実装前に確認する **現在の前提**。機能要件、ロー
 | 扱う機密 | 履歴にはコピーしたものがそのまま入る。記録しないもの（パスワード管理ソフトの印付きのコピー、ファイルのコピー、10 万バイトを超えるもの）を除き、件数と期間で上限を付けてディスクに平文で置く |
 | 外との接続 | なし（自分から出る通信は updater の feed だけ） |
 | OS の権限 | macOS で前のアプリに ⌘V を送るのにアクセシビリティの許可が要る。無いときはコピーだけにする。Windows は不要 |
-| 配布の形 | desktop-apps 同居（Platform Optional「複数ツール同居リポジトリ」。tag `clip-v*`、feed は固定リリース `clip-updater`） |
+| 配布の形 | workbench 同居（Platform Optional「複数ツール同居リポジトリ」。tag `clip-v*`、feed は固定リリース `clip-updater`） |
 | 識別子 | `dev.workbench.clip`（一度配布したら変えない） |
 | productName | `Clip` |
 | desktop-base | 未採用（まだ無い）。`proxy.rs`・`update.rs`・`login_item.rs` は Shelf から写した。desktop-base ができたら差し替える |
-| updater の署名鍵 | desktop-apps の Secrets の鍵（Shelf・Renamer と共有。公開鍵 ID `50FEA12A1D8F04D1`） |
+| updater の署名鍵 | workbench の Secrets の鍵（Shelf・Renamer と共有。公開鍵 ID `50FEA12A1D8F04D1`） |
 
 ## 該当しない Standard
 

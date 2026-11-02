@@ -13,12 +13,12 @@ AI と人が実装前に確認する **現在の前提**。機能要件、ロー
 | ファイルへの操作 | 見るだけ。削除・ごみ箱への移動は入れない（利用者と相談して決めた。必要になったら人が決める） |
 | データの置き場 | `settings.json`（アップデートの自動確認）だけ。スキャンの結果はメモリにだけ持つ |
 | 外との接続 | なし（自分から出る通信は updater の feed だけ） |
-| 配布の形 | desktop-apps 同居（Platform Optional「複数ツール同居リポジトリ」。tag `disk-analyzer-v*`、feed は固定リリース `disk-analyzer-updater`） |
+| 配布の形 | workbench 同居（Platform Optional「複数ツール同居リポジトリ」。tag `disk-analyzer-v*`、feed は固定リリース `disk-analyzer-updater`） |
 | 識別子 | `dev.workbench.disk-analyzer`（一度配布したら変えない） |
 | productName | `Disk Analyzer`（空白入り。CI がリリースのファイル名の空白を `_` に変える） |
 | 主な利用 OS | Windows（社内のほぼ全員）。macOS も Platform の基準どおり配布するが、確認の優先度は Windows を先にする |
 | desktop-base | 未採用（まだ無い）。Renamer の雛形から写す。desktop-base ができたら差し替える |
-| updater の署名鍵 | desktop-apps の Secrets の鍵（Shelf・Renamer と同じ。公開鍵 ID `50FEA12A1D8F04D1`） |
+| updater の署名鍵 | workbench の Secrets の鍵（Shelf・Renamer と同じ。公開鍵 ID `50FEA12A1D8F04D1`） |
 
 ## 該当しない Standard
 

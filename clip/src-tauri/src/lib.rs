@@ -1,4 +1,5 @@
 mod clipboard;
+mod feed;
 mod login_item;
 mod paste;
 mod proxy;
@@ -203,7 +204,7 @@ fn install_update(app: AppHandle) {
 /// made here, so the window can't open any other.
 #[tauri::command]
 fn open_release_page(app: AppHandle, version: Option<String>) {
-    update::open_release_page(&version.unwrap_or_else(|| app.package_info().version.to_string()));
+    update::open_release_page(&app, &version.unwrap_or_else(|| app.package_info().version.to_string()));
 }
 
 /// Asks for the Accessibility permission and opens its pane in System

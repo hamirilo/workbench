@@ -1,4 +1,5 @@
 pub mod commands;
+pub mod feed;
 pub mod places;
 pub mod proxy;
 pub mod scan;

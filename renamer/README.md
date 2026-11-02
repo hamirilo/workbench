@@ -35,7 +35,7 @@ Windows は ⌘ → Ctrl、⌥ → Alt。
 
 ## インストール
 
-[Releases](https://github.com/jazmf-dx/desktop-apps/releases?q=renamer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
+[Releases](https://github.com/hamirilo/workbench/releases?q=renamer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
 
 - **macOS**：`.dmg` を開いて「アプリケーション」へコピー → 起動すると「開発元を検証できない」と出るので「完了」→ **システム設定 › プライバシーとセキュリティ** の下にある「このまま開く」。ターミナルで `xattr -dr com.apple.quarantine "/Applications/Renamer.app"` でもよい
 - **Windows**：`-setup.exe` を実行 → SmartScreen が出たら「詳細情報」→「実行」
@@ -94,7 +94,7 @@ Linux で Rust をビルドするには `libwebkit2gtk-4.1-dev` などが要る�
 
 ## リリース
 
-desktop-apps の決まり（リポジトリ直下の README「リポジトリの決まりごと」、Platform Optional「複数ツール同居リポジトリ」）に従う。
+workbench の決まり（リポジトリ直下の README「リポジトリの決まりごと」、Platform Optional「複数ツール同居リポジトリ」）に従う。
 
 1. バージョンを `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` の 3 か所で上げ、lockfile も更新する（`bun pm version X --no-git-tag-version`、`cargo update -p renamer --manifest-path src-tauri/Cargo.toml`）
 2. `CHANGELOG.md` に `## <version>` の節を書く（変更点 / ダウンロード / 注意。リリースの本文になる。アップデートのダイアログと設定の「更新内容」からこのページへ飛ぶ）
@@ -102,4 +102,4 @@ desktop-apps の決まり（リポジトリ直下の README「リポジトリの
 4. Actions › **renamer** › **Run workflow** で `main`、`release` にチェックを入れて実行する。`renamer-v<version>` の tag を push しても同じ
 5. CI が tag と version の一致、CHANGELOG の節、更新ファイルの有無を確かめ、`Renamer v<version>` のリリースを作って公開し、固定リリース `renamer-updater` の `latest.json` を差し替える。配布済みのアプリはここを見て更新する
 
-署名鍵は desktop-apps の Secrets（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`。Shelf と共有）。**`renamer-updater` のリリースと tag は消さない**（配布済みのアプリが更新を見つけられなくなる）。
+署名鍵は workbench の Secrets（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`。Shelf と共有）。**`renamer-updater` のリリースと tag は消さない**（配布済みのアプリが更新を見つけられなくなる）。

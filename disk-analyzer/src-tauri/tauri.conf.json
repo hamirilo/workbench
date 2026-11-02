@@ -74,7 +74,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUwRkVBMTJBMUQ4RjA0RDEKUldUUkJJOGRLcUgrVUdvQm90SUEyaVFtQVBqd24zdnQydXAwTG1SM1YvN01hN3VFUmRWdWVsM3QK",
       "endpoints": [
-        "https://github.com/jazmf-dx/desktop-apps/releases/download/disk-analyzer-updater/latest.json"
+        "https://github.com/hamirilo/workbench/releases/download/disk-analyzer-updater/latest.json"
       ],
       "windows": {
         "installMode": "passive"

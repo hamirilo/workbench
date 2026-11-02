@@ -1,5 +1,6 @@
 mod clipboard;
 mod drag_watch;
+mod feed;
 mod login_item;
 mod proxy;
 mod settings;

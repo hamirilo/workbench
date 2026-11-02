@@ -11,11 +11,11 @@ AI と人が実装前に確認する **現在の前提**。機能要件、ロー
 | UI の実装 | 素の TypeScript + CSS（React なし）。トレイ常駐の小物なので Platform Optional「トレイ常駐」のとおり |
 | データの置き場 | `app_data_dir()` の `shelf.json`（ファイルの場所の一覧だけ。中身はコピーしない）と、ログイン項目の目印 `launch-at-login-set`。設定は `app_config_dir()` の `settings.json`（トレイのチェック項目で変える）。README「知っておくとよいこと」 |
 | 外との接続 | なし（自分から出る通信は updater の feed だけ） |
-| 配布の形 | desktop-apps 同居（Platform Optional「複数ツール同居リポジトリ」。tag `shelf-v*`、feed は固定リリース `shelf-updater`） |
+| 配布の形 | workbench 同居（Platform Optional「複数ツール同居リポジトリ」。tag `shelf-v*`、feed は固定リリース `shelf-updater`） |
 | 識別子 | `dev.workbench.shelf`（配布済み。変えない） |
 | productName | `Shelf` |
 | desktop-base | 未採用（まだ無い）。`proxy.rs` と `update.rs` はツール内にある。desktop-base ができたら差し替える |
-| updater の署名鍵 | desktop-apps の Secrets の鍵（Renamer と共有。公開鍵 ID `50FEA12A1D8F04D1`） |
+| updater の署名鍵 | workbench の Secrets の鍵（Renamer と共有。公開鍵 ID `50FEA12A1D8F04D1`） |
 
 ## 該当しない Standard
 

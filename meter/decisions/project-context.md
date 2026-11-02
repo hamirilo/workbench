@@ -14,12 +14,12 @@ AI と人が実装前に確認する **現在の前提**。機能要件、ロー
 | 値の読み取り | sysinfo（Recommendations に未収録。健全性チェックは PR の説明に書いた） |
 | データの置き場 | `app_config_dir()` の `settings.json`（出す項目と更新の間隔）と、`app_data_dir()` のログイン項目の目印 `launch-at-login-set`。測った値はメモリにだけ持つ |
 | 外との接続 | なし（自分から出る通信は updater の feed だけ） |
-| 配布の形 | desktop-apps 同居（Platform Optional「複数ツール同居リポジトリ」。tag `meter-v*`、feed は固定リリース `meter-updater`） |
+| 配布の形 | workbench 同居（Platform Optional「複数ツール同居リポジトリ」。tag `meter-v*`、feed は固定リリース `meter-updater`） |
 | 識別子 | `dev.workbench.meter`（一度配布したら変えない） |
 | productName | `Meter` |
 | 主な利用 OS | Windows（社内のほぼ全員）。macOS も Platform の基準どおり配布するが、確認の優先度は Windows を先にする |
 | desktop-base | 未採用（まだ無い）。`proxy.rs`・`update.rs`・`login_item.rs` は Clip から、ログの配線は Disk Analyzer から写した。desktop-base ができたら差し替える |
-| updater の署名鍵 | desktop-apps の Secrets の鍵（Shelf・Clip・Renamer・Disk Analyzer と共有。公開鍵 ID `50FEA12A1D8F04D1`） |
+| updater の署名鍵 | workbench の Secrets の鍵（Shelf・Clip・Renamer・Disk Analyzer と共有。公開鍵 ID `50FEA12A1D8F04D1`） |
 
 ## 該当しない Standard
 

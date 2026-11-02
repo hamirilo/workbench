@@ -8,7 +8,7 @@
 
 ## インストール
 
-[Releases](https://github.com/jazmf-dx/desktop-apps/releases?q=shelf) から最新版をダウンロードしてください。
+[Releases](https://github.com/hamirilo/workbench/releases?q=shelf) から最新版をダウンロードしてください。
 
 | OS | ファイル | 入れ方 |
 | --- | --- | --- |
@@ -240,7 +240,7 @@ bun run tauri build --config /tmp/no-updater.json
 - `Shelf_<バージョン>_aarch64.dmg` / `Shelf_<バージョン>_x64-setup.exe`：初回インストール用
 - `Shelf.app.tar.gz`：アプリ内アップデート用（macOS。Windows は `-setup.exe` をそのまま使う）
 
-インストール済みのアプリは `https://github.com/jazmf-dx/desktop-apps/releases/download/shelf-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、image-library のように `releases/latest` は使えません。そこでリリースのたびに、`shelf-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`shelf-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
+インストール済みのアプリは `https://github.com/hamirilo/workbench/releases/download/shelf-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、image-library のように `releases/latest` は使えません。そこでリリースのたびに、`shelf-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`shelf-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
 
 更新ファイルの署名鍵は GitHub Actions の Secrets に置きます（`TAURI_SIGNING_PRIVATE_KEY`：秘密鍵ファイルの中身、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`：パスワード、なければ空）。鍵は Shelf 専用で（`~/.tauri/shelf.key`）、対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。**秘密鍵を失うと配布済みのアプリに更新を届けられなくなる**ので、必ずバックアップを取ってください。鍵の作り直しは `bunx @tauri-apps/cli signer generate -w ~/.tauri/shelf.key`（作り直すと、それまでに配布した版には更新が届かなくなります）。
 
