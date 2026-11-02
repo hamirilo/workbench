@@ -1,4 +1,4 @@
-// `npm run lint` (Platform Governance §4). Only rules that catch mistakes;
+// `bun run lint` (Platform Governance §4). Only rules that catch mistakes;
 // formatting is left to the editor.
 import js from "@eslint/js";
 import reactHooks from "eslint-plugin-react-hooks";

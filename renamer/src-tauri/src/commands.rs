@@ -36,31 +36,22 @@ pub fn set_app_settings<R: Runtime>(app: AppHandle<R>, settings: AppSettings) ->
     Ok(settings)
 }
 
-/// The proxy the OS would use for `url` (PAC included), for the updater
-/// (src/lib/update.ts). None = direct.
+/// The proxy the OS would use for this build's update feed (PAC included),
+/// for the updater (src/lib/update.ts): its HTTP client can't run PAC
+/// scripts. None = direct.
 #[tauri::command]
-pub async fn system_proxy(url: String) -> Option<String> {
-    tauri::async_runtime::spawn_blocking(move || crate::proxy::for_url(&url)).await.ok().flatten()
+pub async fn system_proxy<R: Runtime>(app: AppHandle<R>) -> Option<String> {
+    let feed = crate::feed::update_feed(&app)?;
+    tauri::async_runtime::spawn_blocking(move || crate::proxy::for_url(&feed)).await.ok().flatten()
 }
 
 /// Opens the GitHub release page of `version` in the browser. The update
 /// dialog and the settings' アップデート section link there for what changed,
 /// instead of showing the release notes in the app.
 #[tauri::command]
-pub fn open_release_page(version: String) -> CmdResult<()> {
-    tauri_plugin_opener::open_url(release_page(&version)?, None::<&str>).map_err(err)
-}
-
-/// Same repository as `plugins.updater.endpoints` in tauri.conf.json; the
-/// tag is `renamer-v<version>` (the repository's other tools share it). Only a
-/// version goes into the URL, so the page can't be sent anywhere else.
-fn release_page(version: &str) -> CmdResult<String> {
-    let version = version.strip_prefix('v').unwrap_or(version);
-    let ok = !version.is_empty() && version.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '+'));
-    if !ok {
-        return Err(format!("not a version: {version}"));
-    }
-    Ok(format!("https://github.com/2204601/workbench/releases/tag/renamer-v{version}"))
+pub fn open_release_page<R: Runtime>(app: AppHandle<R>, version: String) -> CmdResult<()> {
+    let page = crate::feed::release_page(&crate::feed::update_feed(&app).unwrap_or_default(), &version)?;
+    tauri_plugin_opener::open_url(page, None::<&str>).map_err(err)
 }
 
 /// ヘルプ › ログを表示: the log file in Finder / Explorer.
@@ -408,18 +399,4 @@ pub async fn journal_status<R: Runtime>(app: AppHandle<R>) -> CmdResult<JournalS
     })
     .await
     .map_err(err)?
-}
-
-#[cfg(test)]
-mod release_page_tests {
-    #[test]
-    fn takes_only_a_version() {
-        let page = "https://github.com/2204601/workbench/releases/tag/renamer-v0.2.0";
-        assert_eq!(super::release_page("0.2.0").unwrap(), page);
-        assert_eq!(super::release_page("v0.2.0").unwrap(), page);
-        assert!(super::release_page("1.0.0-beta.1").is_ok());
-        assert!(super::release_page("").is_err());
-        assert!(super::release_page("0.2.0/../../evil").is_err());
-        assert!(super::release_page("0.2.0?x=1").is_err());
-    }
 }

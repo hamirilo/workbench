@@ -9,6 +9,7 @@
   --accent-soft: rgba(74, 114, 240, 0.14);
   --danger: #e5484d;
   --copy: #2f9e6e;
+  --window-radius: 14px;
   color-scheme: light dark;
 }
 
@@ -38,6 +39,17 @@ html,
 body {
   height: 100%;
   margin: 0;
+}
+
+/* macOS: the window itself is transparent (tauri.macos.conf.json), so the
+   shelf draws its own rounded corners. Windows 11 rounds the window. */
+html.rounded {
+  background: transparent;
+}
+
+html.rounded body {
+  border-radius: var(--window-radius);
+  border: 1px solid var(--border);
 }
 
 body {
@@ -104,7 +116,7 @@ button {
   place-items: center;
   width: 26px;
   height: 26px;
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--muted);
 }
 
@@ -150,7 +162,7 @@ main {
   align-items: center;
   gap: 10px;
   padding: 6px 6px 6px 8px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid transparent;
 }
 
@@ -171,7 +183,7 @@ main {
   flex: none;
   width: 36px;
   height: 36px;
-  border-radius: 6px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -248,7 +260,7 @@ main {
   position: absolute;
   inset: 0;
   transform: translate(3px, -3px);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
 }
@@ -298,7 +310,7 @@ main {
   text-align: center;
   color: var(--muted);
   border: 2px dashed var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   pointer-events: none;
 }
 
@@ -326,7 +338,7 @@ main {
   display: grid;
   place-items: center;
   border: 2px dashed var(--accent);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--accent-soft);
   color: var(--accent);
   font-weight: 600;
@@ -353,7 +365,7 @@ footer {
   justify-content: center;
   gap: 6px;
   height: 30px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--muted);

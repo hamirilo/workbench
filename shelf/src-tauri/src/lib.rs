@@ -1,7 +1,9 @@
 mod clipboard;
 mod drag_watch;
+mod feed;
 mod login_item;
 mod proxy;
+mod settings;
 mod shelf;
 mod shortcut;
 mod tray_icon;
@@ -9,11 +11,13 @@ mod update;
 
 use std::path::PathBuf;
 
+use settings::Settings;
 use shelf::{Shelf, ShelfItem};
 use tauri::{
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
     tray::TrayIconBuilder,
     AppHandle, Emitter, Manager, PhysicalPosition, State, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent,
+    Wry,
 };
 use tauri_plugin_opener::OpenerExt;
 
@@ -90,6 +94,27 @@ fn prune_missing(app: AppHandle, shelf: State<Shelf>, paths: Vec<String>) -> Cmd
     Ok(hide_if_empty(&app, shelf.list()))
 }
 
+/// Items were dragged out and dropped somewhere: takes them off the shelf
+/// and hides it, as far as the settings say to.
+#[tauri::command]
+fn used_items(
+    app: AppHandle,
+    shelf: State<Shelf>,
+    settings: State<Settings>,
+    paths: Vec<String>,
+) -> CmdResult<Vec<ShelfItem>> {
+    let values = settings.get();
+    if values.remove_after_use {
+        shelf.remove(&paths).map_err(err)?;
+    }
+    if values.hide_after_use {
+        if let Some(window) = app.get_webview_window("main") {
+            let _ = window.hide();
+        }
+    }
+    Ok(hide_if_empty(&app, shelf.list()))
+}
+
 #[tauri::command]
 fn unstack_items(shelf: State<Shelf>, paths: Vec<String>) -> CmdResult<Vec<ShelfItem>> {
     shelf.unstack(&paths).map_err(err)?;
@@ -157,6 +182,36 @@ fn dock_to_right_edge(window: &WebviewWindow) -> tauri::Result<()> {
     window.set_position(PhysicalPosition::new(x, y))
 }
 
+/// macOS: clips the (transparent, tauri.macos.conf.json) shelf window to
+/// rounded corners. The window shadow follows what is drawn, so clipping the
+/// window itself keeps it from being worked out from a square frame before
+/// the page has drawn its own rounded corners. Same radius as
+/// `--window-radius` in styles.css.
+#[cfg(target_os = "macos")]
+fn round_corners(window: &WebviewWindow) {
+    use objc2::{msg_send, runtime::AnyObject};
+
+    const RADIUS: f64 = 14.0;
+    let Ok(view) = window.ns_view() else {
+        return;
+    };
+    let view = view.cast::<AnyObject>();
+    // SAFETY: `view` is the window's live NSView, used on the main thread
+    // during setup; the messages are plain AppKit / Core Animation setters.
+    unsafe {
+        let _: () = msg_send![view, setWantsLayer: true];
+        let layer: *mut AnyObject = msg_send![view, layer];
+        if !layer.is_null() {
+            let _: () = msg_send![layer, setCornerRadius: RADIUS];
+            let _: () = msg_send![layer, setMasksToBounds: true];
+        }
+        let ns_window: *mut AnyObject = msg_send![view, window];
+        if !ns_window.is_null() {
+            let _: () = msg_send![ns_window, invalidateShadow];
+        }
+    }
+}
+
 /// Creates the thin strip along the right edge of the primary screen that
 /// brings up the shelf when a drag touches it.
 fn create_edge_strip(app: &AppHandle) -> tauri::Result<()> {
@@ -188,12 +243,28 @@ fn create_edge_strip(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+/// Flips one of the settings from its tray menu item, then shows the saved state.
+fn toggle_setting(app: &AppHandle, item: &CheckMenuItem<Wry>, field: fn(&mut settings::Values) -> &mut bool) {
+    let settings = app.state::<Settings>();
+    if let Err(e) = settings.update(|v| {
+        let value = field(v);
+        *value = !*value;
+    }) {
+        eprintln!("settings: {e}");
+    }
+    let _ = item.set_checked(*field(&mut settings.get()));
+}
+
 /// `has_shortcut`: whether the global shortcut could be registered, and so
 /// can be shown next to the item it stands for.
 fn setup_tray(app: &AppHandle, has_shortcut: bool) -> tauri::Result<()> {
     let toggle =
         MenuItem::with_id(app, "toggle", "表示 / 非表示", true, has_shortcut.then_some(shortcut::ACCELERATOR))?;
     let paste = MenuItem::with_id(app, "paste", "コピーしたファイルを置く", true, None::<&str>)?;
+    let values = app.state::<Settings>().get();
+    let remove =
+        CheckMenuItem::with_id(app, "remove", settings::REMOVE_LABEL, true, values.remove_after_use, None::<&str>)?;
+    let hide = CheckMenuItem::with_id(app, "hide", settings::HIDE_LABEL, true, values.hide_after_use, None::<&str>)?;
     let login =
         CheckMenuItem::with_id(app, "login", login_item::MENU_LABEL, true, login_item::is_enabled(app), None::<&str>)?;
     let update = MenuItem::with_id(app, "update", update::MENU_LABEL, true, None::<&str>)?;
@@ -203,6 +274,9 @@ fn setup_tray(app: &AppHandle, has_shortcut: bool) -> tauri::Result<()> {
         &[
             &toggle,
             &paste,
+            &PredefinedMenuItem::separator(app)?,
+            &remove,
+            &hide,
             &PredefinedMenuItem::separator(app)?,
             &login,
             &update,
@@ -220,6 +294,8 @@ fn setup_tray(app: &AppHandle, has_shortcut: bool) -> tauri::Result<()> {
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "toggle" => toggle_main_window(app),
             "paste" => paste_and_show(app),
+            "remove" => toggle_setting(app, &remove, |v| &mut v.remove_after_use),
+            "hide" => toggle_setting(app, &hide, |v| &mut v.hide_after_use),
             "login" => login_item::toggle(app, &login),
             "update" => update::check(app, true),
             "quit" => app.exit(0),
@@ -256,6 +332,7 @@ pub fn run() {
             let has_items = !shelf.list().is_empty();
             allow_thumbnails(app.handle(), shelf.list().into_iter().map(|item| PathBuf::from(item.path)));
             app.manage(shelf);
+            app.manage(Settings::load(app.path().app_config_dir()?.join("settings.json")));
 
             login_item::enable_once(app.handle());
             let has_shortcut = shortcut::register(app.handle());
@@ -267,6 +344,8 @@ pub fn run() {
 
             if let Some(window) = app.get_webview_window("main") {
                 let _ = dock_to_right_edge(&window);
+                #[cfg(target_os = "macos")]
+                round_corners(&window);
                 // Otherwise the shelf waits, hidden, for the next drag. It is
                 // shown on the very first launch so people see it exists.
                 if has_items || first_run {
@@ -291,6 +370,7 @@ pub fn run() {
             add_clipboard_files,
             remove_items,
             prune_missing,
+            used_items,
             unstack_items,
             clear_items,
             reveal_item,

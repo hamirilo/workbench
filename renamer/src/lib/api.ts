@@ -123,7 +123,7 @@ export interface JournalStatus {
 export const api = {
   getAppSettings: () => invoke<AppSettings>("get_app_settings"),
   setAppSettings: (settings: AppSettings) => invoke<AppSettings>("set_app_settings", { settings }),
-  systemProxy: (url: string) => invoke<string | null>("system_proxy", { url }),
+  systemProxy: () => invoke<string | null>("system_proxy"),
   revealLog: () => invoke<void>("reveal_log"),
   /** The GitHub release page of `version` (what changed), in the browser. */
   openReleasePage: (version: string) => invoke<void>("open_release_page", { version }),

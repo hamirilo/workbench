@@ -55,7 +55,7 @@ CPU・メモリ・ディスク・ネットワークの使用状況を、タス�
 
 ## インストール
 
-[Releases](https://github.com/2204601/workbench/releases?q=meter) から最新版をダウンロードしてください。
+[Releases](https://github.com/hamirilo/workbench/releases?q=meter) から最新版をダウンロードしてください。
 
 | OS | ファイル | 入れ方 |
 | --- | --- | --- |
@@ -133,26 +133,26 @@ Tauri 2（Rust）＋ TypeScript（Vite、フレームワークなし）で作っ
 
 ```sh
 cd meter
-npm install
-npm run tauri dev      # 開発モードで起動（画面の変更はすぐ反映されます）
-npm run dev            # ブラウザでポップアップだけ（作り物の値。src/dev/mockBackend.ts）
-npm run tauri build    # インストーラを作成（macOS は .app/.dmg、Windows は -setup.exe）
-npm test               # Rust のテストと型チェック
-npm run lint           # ESLint、cargo fmt --check、clippy（CI と同じ）
+bun install
+bun run tauri dev      # 開発モードで起動（画面の変更はすぐ反映されます）
+bun run dev            # ブラウザでポップアップだけ（作り物の値。src/dev/mockBackend.ts）
+bun run tauri build    # インストーラを作成（macOS は .app/.dmg、Windows は -setup.exe）
+bun run test           # Rust のテストと型チェック
+bun run lint           # ESLint、cargo fmt --check、clippy（CI と同じ）
 ```
 
 作成したインストーラは `src-tauri/target/release/bundle/` に出力されます。
 
-`npm run tauri build` にはアプリ内アップデート用の署名鍵が要ります（`createUpdaterArtifacts` が有効なため）。鍵なしでインストーラだけ作るときは、更新ファイルを作らない設定を足します。
+`bun run tauri build` にはアプリ内アップデート用の署名鍵が要ります（`createUpdaterArtifacts` が有効なため）。鍵なしでインストーラだけ作るときは、更新ファイルを作らない設定を足します。
 
 ```sh
-TAURI_SIGNING_PRIVATE_KEY="$(cat <秘密鍵のファイル>)" npm run tauri build
+TAURI_SIGNING_PRIVATE_KEY="$(cat <秘密鍵のファイル>)" bun run tauri build
 # 鍵なし
 echo '{"bundle":{"createUpdaterArtifacts":false}}' > /tmp/no-updater.json
-npm run tauri build -- --config /tmp/no-updater.json
+bun run tauri build --config /tmp/no-updater.json
 ```
 
-開発モード（`npm run tauri dev`）では自動のアップデート確認はしません（メニューの「アップデートを確認…」は動きます）。「ログイン時に起動」も自動ではオンにしません。
+開発モード（`bun run tauri dev`）では自動のアップデート確認はしません（メニューの「アップデートを確認…」は動きます）。「ログイン時に起動」も自動ではオンにしません。
 
 Linux でもビルドとテストはできます。トレイは Windows と同じ項目ごとのアイコンになります（Linux 向けには配布しません）。
 
@@ -177,7 +177,7 @@ Linux でもビルドとテストはできます。トレイは Windows と同�
 | `CLAUDE.md`, `decisions/` | 開発の基準（[desktop-platform](https://github.com/jazmf-dx/desktop-platform)）への参照、前提（`project-context.md`）、基準から外れているところの記録（ADR） |
 | `src-tauri/tauri.conf.json` | アプリ名・バージョン・ウィンドウ設定・作るインストーラの種類 |
 | `src-tauri/capabilities/default.json` | 画面に許可する操作（権限） |
-| `src-tauri/icons/` | アプリアイコン（`app-icon.svg` から `npx tauri icon` で生成） |
+| `src-tauri/icons/` | アプリアイコン（`app-icon.svg` から `bunx tauri icon` で生成） |
 
 ### CI
 
@@ -188,7 +188,7 @@ Linux でもビルドとテストはできます。トレイは Windows と同�
 ### リリース手順
 
 1. バージョンを上げる（3 か所とも同じ値にします）
-   - `package.json` … `npm version <バージョン> --no-git-tag-version`（`package-lock.json` も更新されます）
+   - `package.json` … `bun pm version <バージョン> --no-git-tag-version`（`bun.lock` には版が無いので、ほかに直す所はありません）
    - `src-tauri/tauri.conf.json` の `version`
    - `src-tauri/Cargo.toml` の `version`（`Cargo.lock` は `cargo update -p meter` で更新）
 2. [`CHANGELOG.md`](CHANGELOG.md) に `## <バージョン>` の節を書く。この節がそのままリリースの本文になります
@@ -205,7 +205,7 @@ Linux でもビルドとテストはできます。トレイは Windows と同�
 
 リリースには、インストーラのほかにアプリ内アップデート用のファイル（`Meter.app.tar.gz` と `.sig`、`-setup.exe` の `.sig`、`latest.json`）が添付されます。
 
-インストール済みのアプリは `https://github.com/2204601/workbench/releases/download/meter-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、リリースのたびに `meter-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`meter-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
+インストール済みのアプリは `https://github.com/hamirilo/workbench/releases/download/meter-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、リリースのたびに `meter-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`meter-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
 
 更新ファイルの署名鍵は、workbench の他のツールと共通の GitHub Actions の Secrets（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`）を使います。対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。
 

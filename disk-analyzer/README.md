@@ -48,7 +48,7 @@ Windows は ⌘ → Ctrl。
 
 ## インストール
 
-[Releases](https://github.com/2204601/workbench/releases?q=disk-analyzer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
+[Releases](https://github.com/hamirilo/workbench/releases?q=disk-analyzer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
 
 - **Windows**：`-setup.exe` を実行 → SmartScreen が出たら「詳細情報」→「実行」
 - **macOS**：`.dmg` を開いて「アプリケーション」へコピー → 起動すると「開発元を検証できない」と出るので「完了」→ **システム設定 › プライバシーとセキュリティ** の下にある「このまま開く」。ターミナルで `xattr -dr com.apple.quarantine "/Applications/Disk Analyzer.app"` でもよい
@@ -72,11 +72,11 @@ Windows は ⌘ → Ctrl。
 開発の基準は [desktop-platform](https://github.com/jazmf-dx/desktop-platform) に従う。前提は [decisions/project-context.md](decisions/project-context.md)。コマンドは `disk-analyzer/` で実行する。
 
 ```bash
-npm install
-npm run tauri dev      # アプリを起動
-npm run dev            # ブラウザで UI だけ（モック。src/dev/mockBackend.ts）
-npm test               # cargo test + tsc --noEmit
-npm run lint           # eslint + cargo fmt --check + clippy
+bun install
+bun run tauri dev      # アプリを起動
+bun run dev            # ブラウザで UI だけ（モック。src/dev/mockBackend.ts）
+bun run test           # cargo test + tsc --noEmit
+bun run lint           # eslint + cargo fmt --check + clippy
 cargo run --release --example scan --manifest-path src-tauri/Cargo.toml -- <フォルダ>   # 画面なしでスキャンし、時間と上位 10 件を出す
 ```
 
@@ -89,7 +89,7 @@ Linux で Rust をビルドするには `libwebkit2gtk-4.1-dev` などが要る�
 | `src/` | React の UI。`lib/commands.ts` がコマンド表、`lib/api.ts` が Rust コマンドの型付きラッパ、`lib/charts.ts` がグラフ 5 種の設定と色、`components/charts/` がレイアウトと描画 |
 | `src-tauri/src/` | Rust。`lib.rs` が plugin の配線、`commands.rs` がフロントから呼ぶコマンド、`scan.rs` がスキャン、`view.rs` がグラフと一覧に渡す形、`places.rs` がドライブの一覧と空き容量、`volume.rs` がネットワークの判定 |
 | `src-tauri/tests/ipc.rs` | コマンドを JS と同じ引数で IPC 越しに呼ぶテスト（Tauri のモックランタイム） |
-| `src-tauri/icons/` | アプリアイコン（`app-icon.svg` から `npx tauri icon` で生成） |
+| `src-tauri/icons/` | アプリアイコン（`app-icon.svg` から `bunx tauri icon` で生成） |
 | [docs/SPEC.md](docs/SPEC.md) | 機能仕様 |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 設計（層、コマンド、ツリーの持ち方、テスト） |
 
@@ -101,7 +101,7 @@ Linux で Rust をビルドするには `libwebkit2gtk-4.1-dev` などが要る�
 
 workbench の決まり（リポジトリ直下の README「リポジトリの決まりごと」、Platform Optional「複数ツール同居リポジトリ」）に従う。
 
-1. バージョンを `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` の 3 か所で上げ、lockfile も更新する（`npm version X --no-git-tag-version`、`cargo update -p disk-analyzer --manifest-path src-tauri/Cargo.toml`）
+1. バージョンを `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` の 3 か所で上げ、lockfile も更新する（`bun pm version X --no-git-tag-version`、`cargo update -p disk-analyzer --manifest-path src-tauri/Cargo.toml`）
 2. `CHANGELOG.md` に `## <version>` の節を書く（変更点 / ダウンロード / 注意。リリースの本文になる。アップデートのダイアログと設定の「更新内容」からこのページへ飛ぶ）
 3. `chore: disk-analyzer v<version>` を PR で `main` に入れる
 4. Actions › **disk-analyzer** › **Run workflow** で `main`、`release` にチェックを入れて実行する。`disk-analyzer-v<version>` の tag を push しても同じ

@@ -2,6 +2,22 @@
 
 リリースは GitHub Actions の meter ワークフローを `release` にチェックを入れて手動実行するか、`meter-v<バージョン>` のタグを push すると作成されます。本文はこのファイルの該当バージョンの節から取られます。
 
+## 0.1.1
+
+### 変更点
+
+- アップデートのお知らせを「Meter の新しいバージョンがあります」のダイアログにし、ボタンを「更新して再起動」「あとで」「更新内容を見る」にしました。更新内容は GitHub のリリースのページで見られます
+- 見送った更新は、トレイ（メニューバー）のメニューに「v… に更新…」と出ます
+
+### ダウンロード
+
+| OS | ファイル |
+| --- | --- |
+| macOS（Apple Silicon） | `.dmg` |
+| Windows | `-setup.exe` |
+
+0.1.0 を使っている場合は、アプリ内で更新できます（メニューの「アップデートを確認…」）。
+
 ## 0.1.0
 
 最初の版です。
@@ -22,4 +38,4 @@
 | macOS（Apple Silicon） | `.dmg` |
 | Windows | `-setup.exe` |
 
-初回は警告が出ます。手順は [README](https://github.com/2204601/workbench/tree/main/meter#初回起動) を見てください。Windows 11 では、アイコンが最初は「^」の中に入ります（[出し方](https://github.com/2204601/workbench/tree/main/meter#windowsアイコンをタスクバーに出す)）。
+初回は警告が出ます。手順は [README](https://github.com/hamirilo/workbench/tree/main/meter#初回起動) を見てください。Windows 11 では、アイコンが最初は「^」の中に入ります（[出し方](https://github.com/hamirilo/workbench/tree/main/meter#windowsアイコンをタスクバーに出す)）。

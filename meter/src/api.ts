@@ -1,7 +1,7 @@
 /**
  * The Rust side (src-tauri/src/lib.rs, monitor.rs): typed wrappers, so
  * nothing else calls `invoke` or `listen` directly. In a plain browser
- * (`npm run dev`) the mock in dev/mockBackend.ts answers instead.
+ * (`bun run dev`) the mock in dev/mockBackend.ts answers instead.
  */
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";

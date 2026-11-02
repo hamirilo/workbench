@@ -32,15 +32,7 @@ use tauri::{async_runtime::block_on, menu::MenuItem, AppHandle, Emitter, Manager
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind, MessageDialogResult};
 use tauri_plugin_updater::{Update, UpdaterExt};
 
-use crate::{proxy, store::Store};
-
-/// Same as `plugins.updater.endpoints` in tauri.conf.json. Other tools'
-/// releases share this repository, so the feed lives on its own fixed release
-/// instead of `releases/latest`.
-const FEED: &str = "https://github.com/2204601/workbench/releases/download/clip-updater/latest.json";
-
-/// The tag of a version's release (and its notes) in the same repository.
-const RELEASE_PAGE: &str = "https://github.com/2204601/workbench/releases/tag/clip-v";
+use crate::{feed, proxy, store::Store};
 
 pub const MENU_LABEL: &str = "アップデートを確認…";
 
@@ -242,7 +234,8 @@ fn find(app: &AppHandle) -> tauri_plugin_updater::Result<Option<Update>> {
     // The updater's HTTP client can't evaluate PAC scripts, so behind a
     // company proxy it would try to connect directly and fail. The proxy also
     // applies to the download (the Update keeps it).
-    if let Some(proxy) = proxy::for_url(FEED).and_then(|p| Url::parse(&p).ok()) {
+    if let Some(proxy) = feed::update_feed(app).and_then(|feed| proxy::for_url(&feed)).and_then(|p| Url::parse(&p).ok())
+    {
         builder = builder.proxy(proxy);
     }
     block_on(builder.build()?.check())
@@ -279,7 +272,7 @@ fn offer(app: &AppHandle, update: Update) {
         .blocking_show_with_result();
     match choice {
         MessageDialogResult::Custom(c) if c == INSTALL => install(app, update),
-        MessageDialogResult::Custom(c) if c == NOTES => open_release_page(&update.version),
+        MessageDialogResult::Custom(c) if c == NOTES => open_release_page(app, &update.version),
         _ => {}
     }
 }
@@ -323,8 +316,9 @@ fn install(app: &AppHandle, update: Update) {
 }
 
 /// The version's release page (what changed) in the browser.
-pub fn open_release_page(version: &str) {
-    if let Err(e) = tauri_plugin_opener::open_url(format!("{RELEASE_PAGE}{version}"), None::<&str>) {
+pub fn open_release_page(app: &AppHandle, version: &str) {
+    let page = feed::release_page(&feed::update_feed(app).unwrap_or_default(), version);
+    if let Err(e) = page.and_then(|page| tauri_plugin_opener::open_url(page, None::<&str>).map_err(|e| e.to_string())) {
         eprintln!("release page: {e}");
     }
 }

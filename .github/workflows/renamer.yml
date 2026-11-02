@@ -51,11 +51,10 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: renamer/package-lock.json
-      - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npx eslint src
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bunx tsc --noEmit
+      - run: bunx eslint src
       - run: cargo fmt --check --manifest-path src-tauri/Cargo.toml
       # tauri::generate_context! needs the built frontend folder to exist.
       - run: mkdir -p dist
@@ -103,8 +102,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: renamer/package-lock.json
+      - uses: oven-sh/setup-bun@v2
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.rust-targets }}
@@ -112,7 +110,7 @@ jobs:
         with:
           workspaces: renamer/src-tauri -> target
           save-if: ${{ github.ref == 'refs/heads/main' }}
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - name: Build
         shell: bash
         run: |
@@ -123,7 +121,7 @@ jobs:
             echo '{"bundle":{"createUpdaterArtifacts":false}}' > "$RUNNER_TEMP/no-updater.json"
             no_updater=(--config "$RUNNER_TEMP/no-updater.json")
           fi
-          npm run tauri build -- ${{ matrix.build-args }} "${no_updater[@]}"
+          bun run tauri build ${{ matrix.build-args }} "${no_updater[@]}"
       - uses: actions/upload-artifact@v6
         with:
           name: renamer-${{ runner.os }}

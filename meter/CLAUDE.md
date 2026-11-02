@@ -23,12 +23,12 @@ CPU・メモリ・ディスク・ネットワークの使用状況をタスク�
 ## コマンド
 
 ```bash
-npm install
-npm run tauri dev      # アプリを起動
-npm run dev            # ブラウザでポップアップだけ（モック）
-npm test               # cargo test + tsc --noEmit
-npm run lint           # eslint + cargo fmt --check + clippy -D warnings
-npm run tauri build    # 配布用ビルド（署名鍵が要る。README「開発」）
+bun install
+bun run tauri dev      # アプリを起動
+bun run dev            # ブラウザでポップアップだけ（モック）
+bun run test           # cargo test + tsc --noEmit（`bun test` は Bun のテストランナーなので使わない）
+bun run lint           # eslint + cargo fmt --check + clippy -D warnings
+bun run tauri build    # 配布用ビルド（署名鍵が要る。README「開発」）
 ```
 
 ## 変えないもの

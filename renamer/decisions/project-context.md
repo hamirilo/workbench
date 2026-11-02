@@ -16,7 +16,7 @@ AI と人が実装前に確認する **現在の前提**。機能要件、ロー
 | productName | `Renamer` |
 | 主な利用 OS | Windows（社内のほぼ全員）。macOS も Platform の基準どおり配布するが、確認の優先度は Windows を先にする |
 | desktop-base | 未採用（まだ無い）。[stockroom](https://github.com/2204601/stockroom)（旧 image-library）の `170b90c`（v0.17.0）から写す。desktop-base ができたら差し替える |
-| リポジトリ | [2204601/workbench](https://github.com/2204601/workbench) の `renamer/`（jazmf-dx/renamer → 2204601/renamer → workbench と移した。それまでの履歴は 2204601/renamer に残る） |
+| リポジトリ | [hamirilo/workbench](https://github.com/hamirilo/workbench) の `renamer/`（jazmf-dx/renamer → 2204601/renamer → workbench と移した。それまでの履歴は 2204601/renamer に残る） |
 | updater の署名鍵 | workbench の Secrets の鍵（Shelf と同じ。公開鍵 ID `50FEA12A1D8F04D1`）。stockroom の鍵とは別 |
 
 ## 該当しない Standard

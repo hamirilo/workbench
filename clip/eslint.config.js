@@ -1,4 +1,4 @@
-// `npm run lint` (Platform Governance §4), set up like renamer's. Only rules
+// `bun run lint` (Platform Governance §4), set up like renamer's. Only rules
 // that catch mistakes; formatting is left to the editor.
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";

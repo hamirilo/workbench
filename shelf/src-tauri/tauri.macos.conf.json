@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Shelf",
+        "width": 260,
+        "height": 420,
+        "minWidth": 200,
+        "minHeight": 180,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "visibleOnAllWorkspaces": true,
+        "acceptFirstMouse": true,
+        "dragDropEnabled": true,
+        "visible": false
+      }
+    ]
+  }
+}

@@ -23,12 +23,12 @@
 ## コマンド
 
 ```bash
-npm install
-npm run tauri dev      # アプリを起動
-npm run dev            # ブラウザで UI だけ（モック）
-npm test               # cargo test + tsc --noEmit
-npm run lint
-npm run tauri build    # 配布用ビルド（署名鍵が要る。README「リリース」）
+bun install
+bun run tauri dev      # アプリを起動
+bun run dev            # ブラウザで UI だけ（モック）
+bun run test           # cargo test + tsc --noEmit（`bun test` は Bun のテストランナーなので使わない）
+bun run lint
+bun run tauri build    # 配布用ビルド（署名鍵が要る。README「リリース」）
 ```
 
 ## 変えないもの

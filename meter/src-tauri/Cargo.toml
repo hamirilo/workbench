@@ -1,6 +1,6 @@
 [package]
 name = "meter"
-version = "0.1.0"
+version = "0.1.1"
 description = "CPU, memory, disk and network at a glance, from the tray"
 edition = "2021"
 

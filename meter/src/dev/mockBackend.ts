@@ -1,5 +1,5 @@
 /**
- * Made-up readings for working on the popup in a browser (`npm run dev`),
+ * Made-up readings for working on the popup in a browser (`bun run dev`),
  * with the same types as the Rust side (api.ts). Keep it in step when
  * api.ts changes.
  */

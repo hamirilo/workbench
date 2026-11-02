@@ -45,6 +45,11 @@ let mode: DragMode = loadMode();
 // True while one of our own items is being dragged out, so that dropping it
 // back onto the shelf does not re-add it.
 let draggingOut = false;
+// Set when such a drag ends on the shelf itself, which is not a use.
+let droppedBack = false;
+
+// macOS draws the window's rounded corners in CSS (see styles.css).
+if (navigator.userAgent.includes("Mac")) document.documentElement.classList.add("rounded");
 
 function loadMode(): DragMode {
   try {
@@ -372,15 +377,23 @@ trackPointer(dragAllEl, () => {
 async function dragOut(paths: string[], invert: boolean) {
   const effective: DragMode = invert ? (mode === "move" ? "copy" : "move") : mode;
   draggingOut = true;
+  droppedBack = false;
   try {
     await startDrag(
       { item: paths, icon: dragIcon(paths), mode: effective },
       ({ result }) => {
-        draggingOut = false;
-        if (result !== "Dropped" || effective !== "move") return;
-        // The drop target moves the files, possibly asynchronously (large
-        // files, other volumes), so check a few times before giving up.
-        for (const delay of [300, 1500, 5000]) setTimeout(() => pruneMissing(paths), delay);
+        // The shelf's own drop event may still be on its way.
+        setTimeout(() => {
+          draggingOut = false;
+          if (result !== "Dropped" || droppedBack) return;
+          // Taken off the shelf and / or hidden, as the tray menu says.
+          void call("used_items", { paths });
+          if (effective !== "move") return;
+          // When items stay on the shelf: the drop target moves the files,
+          // possibly asynchronously (large files, other volumes), so check a
+          // few times before giving up.
+          for (const delay of [300, 1500, 5000]) setTimeout(() => pruneMissing(paths), delay);
+        }, 50);
       },
     );
   } catch (e) {
@@ -425,7 +438,10 @@ function dragIcon(paths: string[]): string {
 
 void getCurrentWebview().onDragDropEvent((event) => {
   const p = event.payload;
-  if (draggingOut) return;
+  if (draggingOut) {
+    if (p.type === "drop") droppedBack = true;
+    return;
+  }
   if (p.type === "enter" || p.type === "over") {
     overlayEl.classList.add("active");
   } else if (p.type === "leave") {

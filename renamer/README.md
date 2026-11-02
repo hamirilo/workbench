@@ -35,7 +35,7 @@ Windows は ⌘ → Ctrl、⌥ → Alt。
 
 ## インストール
 
-[Releases](https://github.com/2204601/workbench/releases?q=renamer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
+[Releases](https://github.com/hamirilo/workbench/releases?q=renamer) から入れる。Apple や Microsoft の署名をしていないので、**初回だけ** 警告が出る。
 
 - **macOS**：`.dmg` を開いて「アプリケーション」へコピー → 起動すると「開発元を検証できない」と出るので「完了」→ **システム設定 › プライバシーとセキュリティ** の下にある「このまま開く」。ターミナルで `xattr -dr com.apple.quarantine "/Applications/Renamer.app"` でもよい
 - **Windows**：`-setup.exe` を実行 → SmartScreen が出たら「詳細情報」→「実行」
@@ -66,11 +66,11 @@ Windows は ⌘ → Ctrl、⌥ → Alt。
 開発の基準は [desktop-platform](https://github.com/jazmf-dx/desktop-platform) に従う。前提は [decisions/project-context.md](decisions/project-context.md)。コマンドは `renamer/` で実行する。
 
 ```bash
-npm install
-npm run tauri dev      # アプリを起動
-npm run dev            # ブラウザで UI だけ（モック。src/dev/mockBackend.ts）
-npm test               # cargo test + tsc --noEmit
-npm run lint           # eslint + cargo fmt --check + clippy
+bun install
+bun run tauri dev      # アプリを起動
+bun run dev            # ブラウザで UI だけ（モック。src/dev/mockBackend.ts）
+bun run test           # cargo test + tsc --noEmit
+bun run lint           # eslint + cargo fmt --check + clippy
 cargo run --example seed --manifest-path src-tauri/Cargo.toml -- <フォルダ> 10000   # 試し用のファイルを作る
 ```
 
@@ -96,7 +96,7 @@ Linux で Rust をビルドするには `libwebkit2gtk-4.1-dev` などが要る�
 
 workbench の決まり（リポジトリ直下の README「リポジトリの決まりごと」、Platform Optional「複数ツール同居リポジトリ」）に従う。
 
-1. バージョンを `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` の 3 か所で上げ、lockfile も更新する（`npm version X --no-git-tag-version`、`cargo update -p renamer --manifest-path src-tauri/Cargo.toml`）
+1. バージョンを `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` の 3 か所で上げ、lockfile も更新する（`bun pm version X --no-git-tag-version`、`cargo update -p renamer --manifest-path src-tauri/Cargo.toml`）
 2. `CHANGELOG.md` に `## <version>` の節を書く（変更点 / ダウンロード / 注意。リリースの本文になる。アップデートのダイアログと設定の「更新内容」からこのページへ飛ぶ）
 3. `chore: renamer v<version>` を PR で `main` に入れる
 4. Actions › **renamer** › **Run workflow** で `main`、`release` にチェックを入れて実行する。`renamer-v<version>` の tag を push しても同じ

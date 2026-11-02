@@ -1,6 +1,6 @@
 [package]
 name = "clip"
-version = "0.1.1"
+version = "0.1.2"
 description = "Snippets and clipboard history, typed in from one shortcut"
 edition = "2021"
 

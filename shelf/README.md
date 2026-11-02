@@ -8,7 +8,7 @@
 
 ## インストール
 
-[Releases](https://github.com/2204601/workbench/releases?q=shelf) から最新版をダウンロードしてください。
+[Releases](https://github.com/hamirilo/workbench/releases?q=shelf) から最新版をダウンロードしてください。
 
 | OS | ファイル | 入れ方 |
 | --- | --- | --- |
@@ -57,7 +57,7 @@ Finder / エクスプローラからファイルやフォルダを Shelf にド�
 棚が隠れているときは、次のどちらかで出てきます。
 
 - **ファイルを画面の右端まで持っていく**（macOS / Windows）: 右端の中ほどにある細い青い線が目印です。線の上に直接ドロップしても棚に置けます
-- **ファイルをドラッグし始める**（macOS のみ）: Finder や Dock のスタックなどでファイルをドラッグし始めた時点で出てきます
+- **ファイルをドラッグし始める**（macOS のみ）: Finder や Dock のスタックなどでファイルをドラッグし始めた時点で出てきます。Dock のアイコンを並べ替えるときにも一瞬出ますが、何も置かなければすぐ隠れます
 
 何も置かずにドラッグを終えると、棚はまた隠れます。
 
@@ -67,9 +67,23 @@ Shelf のアイテムを、移動先のフォルダやアプリへドラッグ�
 
 - ヘッダーの「**移動** / **コピー**」ボタンで、出したときの動作を切り替えます（既定は移動）
 - **Alt**（macOS は **Option**）を押しながらドラッグすると、その回だけ逆の動作になります
-- 移動で出したファイルは、Shelf からも自動で消えます
-- 「移動」のときも、ファイルを動かさずに受け取るアプリ（Teams、VS Code、ブラウザなど）へはそのまま出せます。その場合はコピーとして渡り、元のファイルも棚もそのまま残ります
+- 出したアイテムは棚から外れ、棚も隠れます（既定）。棚の上へドロップし直したときや、途中でドラッグをやめたときは残ります
+- 「移動」のときも、ファイルを動かさずに受け取るアプリ（Teams、VS Code、ブラウザなど）へはそのまま出せます。その場合はコピーとして渡り、元のファイルはそのまま残ります
 - 「移動」で Finder / エクスプローラへ出したとき、同じディスクの中なら移動、USB メモリなど別のディスクへはコピーになります（Finder / エクスプローラの既定どおり）。別のディスクへ移動したいときは **⌘ Command**（Windows は **Shift**）を押しながらドロップします
+
+### 出したあとの動き（設定）
+
+メニューバー / タスクトレイのアイコンのメニューで、チェックを付け外しして変えられます。
+
+| 項目 | オン（既定） | オフ |
+| --- | --- | --- |
+| 出したら棚から外す | 出したアイテムを棚から外す | 棚に残す（「移動」で出してファイルが動いたときだけ外れる） |
+| 出したら棚を隠す | 出したら棚を隠す | 棚を出したままにする（棚が空になったときだけ隠れる） |
+
+設定は次の場所に保存されます。
+
+- macOS: `~/Library/Application Support/dev.workbench.shelf/settings.json`
+- Windows: `%APPDATA%\dev.workbench.shelf\settings.json`
 
 ### 一緒に置いたファイルはひとまとまりに
 
@@ -111,9 +125,11 @@ Shelf のアイテムを、移動先のフォルダやアプリへドラッグ�
 | ⌘/Ctrl + V | コピーしたファイルを棚に置く |
 | Esc | 選択を解除 |
 | ヘッダーの「—」 | ウィンドウを隠す（次にドラッグすると出てきます） |
-| メニューバー / タスクトレイのアイコン | クリックでメニューを表示（表示 / 非表示、コピーしたファイルを置く、ログイン時に起動、アップデートを確認…、終了） |
+| メニューバー / タスクトレイのアイコン | クリックでメニューを表示（表示 / 非表示、コピーしたファイルを置く、出したら棚から外す、出したら棚を隠す、ログイン時に起動、アップデートを確認…、終了） |
 
 棚の最後のアイテムを出し終える（または棚を空にする）と、ウィンドウは自動で隠れます。棚にアイテムがある状態で起動したときは、最初から表示されます。
+
+macOS では、棚のウィンドウの角はアプリが透明なウィンドウに丸く描いています（`tauri.macos.conf.json` で透明にしている）。Windows 11 では OS が枠なしウィンドウの角を丸めるので、透明にはしていません（Windows 10 では角は四角のままです）。
 
 macOS では Dock にアイコンは出ません。メニューバーのアイコンから操作してください。
 
@@ -150,25 +166,25 @@ Tauri 2（Rust）＋ TypeScript（Vite、フレームワークなし）で作っ
 
 ```sh
 cd shelf
-npm install
-npm run tauri dev      # 開発モードで起動（画面の変更はすぐ反映されます）
-npm run tauri build    # インストーラを作成（macOS は .app/.dmg、Windows は -setup.exe）
-npm test               # Rust のテストと型チェック
-npm run lint           # ESLint、cargo fmt --check、clippy（CI と同じ）
+bun install
+bun run tauri dev      # 開発モードで起動（画面の変更はすぐ反映されます）
+bun run tauri build    # インストーラを作成（macOS は .app/.dmg、Windows は -setup.exe）
+bun run test           # Rust のテストと型チェック
+bun run lint           # ESLint、cargo fmt --check、clippy（CI と同じ）
 ```
 
 作成したインストーラは `src-tauri/target/release/bundle/` に出力されます。
 
-`npm run tauri build` にはアプリ内アップデート用の署名鍵が要ります（`createUpdaterArtifacts` が有効なため）。鍵なしでインストーラだけ作るときは、更新ファイルを作らない設定を足します。
+`bun run tauri build` にはアプリ内アップデート用の署名鍵が要ります（`createUpdaterArtifacts` が有効なため）。鍵なしでインストーラだけ作るときは、更新ファイルを作らない設定を足します。
 
 ```sh
-TAURI_SIGNING_PRIVATE_KEY="$(cat ~/.tauri/shelf.key)" npm run tauri build
+TAURI_SIGNING_PRIVATE_KEY="$(cat ~/.tauri/shelf.key)" bun run tauri build
 # 鍵なし
 echo '{"bundle":{"createUpdaterArtifacts":false}}' > /tmp/no-updater.json
-npm run tauri build -- --config /tmp/no-updater.json
+bun run tauri build --config /tmp/no-updater.json
 ```
 
-開発モード（`npm run tauri dev`）では自動のアップデート確認はしません（トレイの「アップデートを確認…」は動きます）。「ログイン時に起動」も自動ではオンにしません（トレイから手動でオンにすると、開発用のバイナリが登録されるので注意してください）。
+開発モード（`bun run tauri dev`）では自動のアップデート確認はしません（トレイの「アップデートを確認…」は動きます）。「ログイン時に起動」も自動ではオンにしません（トレイから手動でオンにすると、開発用のバイナリが登録されるので注意してください）。
 
 ### 構成
 
@@ -177,6 +193,7 @@ npm run tauri build -- --config /tmp/no-updater.json
 | `index.html`, `src/styles.css` | 画面のレイアウトと見た目 |
 | `src/main.ts` | 画面の動作。ドロップの受け取り、選択、ドラッグで出す処理 |
 | `src-tauri/src/shelf.rs` | 棚のデータ（パスの一覧）と JSON への保存。ユニットテストもここ |
+| `src-tauri/src/settings.rs` | アプリの設定（出したら棚から外す / 隠す）と `settings.json` への保存。トレイのチェック項目から変える |
 | `CLAUDE.md`, `decisions/` | 開発の基準（[desktop-platform](https://github.com/jazmf-dx/desktop-platform)）への参照、前提（`project-context.md`）、基準から外れているところの記録（ADR） |
 | `src-tauri/src/lib.rs` | 画面から呼ぶコマンド、トレイアイコン、ウィンドウの配置 |
 | `src-tauri/src/shortcut.rs` | ショートカットキー（1 回で表示 / 非表示、2 回でコピーしたファイルを置く） |
@@ -187,8 +204,9 @@ npm run tauri build -- --config /tmp/no-updater.json
 | `src-tauri/src/drag_watch.rs` | ドラッグ中に棚を出す処理（macOS のドラッグ開始検知、ドラッグ終了の判定） |
 | `edge.html`, `src/edge.ts` | 画面右端の細いウィンドウ。ドラッグが触れたら棚を出す |
 | `src-tauri/tauri.conf.json` | アプリ名・バージョン・ウィンドウ設定・作るインストーラの種類 |
+| `src-tauri/tauri.macos.conf.json` | macOS だけの上書き。棚のウィンドウを透明にして角を丸く描く（配列は丸ごと置き換わるので、ウィンドウ設定を変えるときは両方直す） |
 | `src-tauri/capabilities/default.json` | 画面に許可する操作（権限） |
-| `src-tauri/icons/` | アプリアイコン（`app-icon.svg` から `npx tauri icon` で生成） |
+| `src-tauri/icons/` | アプリアイコン（`app-icon.svg` から `bunx tauri icon` で生成） |
 | `src-tauri/icons/tray/`, `tray-icon.svg`, `src-tauri/src/tray_icon.rs` | メニューバー / タスクトレイの白黒のアイコン。macOS はテンプレート画像（44px）、Windows はタスクバーの明るさに合わせて白か黒（32px）。PNG は `tray-icon.svg` を透明背景で書き出したもの |
 
 アプリの外へファイルをドラッグして出すには OS ネイティブのドラッグ操作が必要なため、[tauri-plugin-drag](https://github.com/crabnebula-dev/drag-rs) を使っています。その下の `drag` クレートは、「移動」のドラッグでコピーも許すように 1 か所だけ直した版を `vendor/drag/` に置き、`[patch.crates-io]` で差し替えています（理由と変更点は `vendor/drag/SHELF_PATCH.md`）。
@@ -202,7 +220,7 @@ npm run tauri build -- --config /tmp/no-updater.json
 ### リリース手順
 
 1. バージョンを上げる（3 か所とも同じ値にします）
-   - `package.json` … `npm version <バージョン> --no-git-tag-version`（`package-lock.json` も更新されます）
+   - `package.json` … `bun pm version <バージョン> --no-git-tag-version`（`bun.lock` には版が無いので、ほかに直す所はありません）
    - `src-tauri/tauri.conf.json` の `version`
    - `src-tauri/Cargo.toml` の `version`（`Cargo.lock` は `cargo update -p shelf` で更新）
 2. [`CHANGELOG.md`](CHANGELOG.md) に `## <バージョン>` の節を書く。この節がそのままリリースの本文になります
@@ -222,9 +240,9 @@ npm run tauri build -- --config /tmp/no-updater.json
 - `Shelf_<バージョン>_aarch64.dmg` / `Shelf_<バージョン>_x64-setup.exe`：初回インストール用
 - `Shelf.app.tar.gz`：アプリ内アップデート用（macOS。Windows は `-setup.exe` をそのまま使う）
 
-インストール済みのアプリは `https://github.com/2204601/workbench/releases/download/shelf-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、image-library のように `releases/latest` は使えません。そこでリリースのたびに、`shelf-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`shelf-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
+インストール済みのアプリは `https://github.com/hamirilo/workbench/releases/download/shelf-updater/latest.json` を見ます（`tauri.conf.json` の `plugins.updater.endpoints`）。このリポジトリには他のツールのリリースも並ぶため、image-library のように `releases/latest` は使えません。そこでリリースのたびに、`shelf-updater` という固定のリリース（プレリリース扱い）の `latest.json` を新しい版のものに置き換えています。**`shelf-updater` のリリースとタグは消さないでください**（配布済みのアプリが更新を見つけられなくなります）。
 
-更新ファイルの署名鍵は GitHub Actions の Secrets に置きます（`TAURI_SIGNING_PRIVATE_KEY`：秘密鍵ファイルの中身、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`：パスワード、なければ空）。鍵は Shelf 専用で（`~/.tauri/shelf.key`）、対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。**秘密鍵を失うと配布済みのアプリに更新を届けられなくなる**ので、必ずバックアップを取ってください。鍵の作り直しは `npx @tauri-apps/cli signer generate -w ~/.tauri/shelf.key`（作り直すと、それまでに配布した版には更新が届かなくなります）。
+更新ファイルの署名鍵は GitHub Actions の Secrets に置きます（`TAURI_SIGNING_PRIVATE_KEY`：秘密鍵ファイルの中身、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`：パスワード、なければ空）。鍵は Shelf 専用で（`~/.tauri/shelf.key`）、対応する公開鍵は `tauri.conf.json` の `plugins.updater.pubkey` です。**秘密鍵を失うと配布済みのアプリに更新を届けられなくなる**ので、必ずバックアップを取ってください。鍵の作り直しは `bunx @tauri-apps/cli signer generate -w ~/.tauri/shelf.key`（作り直すと、それまでに配布した版には更新が届かなくなります）。
 
 ## 今後の候補
 

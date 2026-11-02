@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Clip",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "dev.workbench.clip",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -74,7 +74,7 @@
   "plugins": {
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUwRkVBMTJBMUQ4RjA0RDEKUldUUkJJOGRLcUgrVUdvQm90SUEyaVFtQVBqd24zdnQydXAwTG1SM1YvN01hN3VFUmRWdWVsM3QK",
-      "endpoints": ["https://github.com/2204601/workbench/releases/download/clip-updater/latest.json"],
+      "endpoints": ["https://github.com/hamirilo/workbench/releases/download/clip-updater/latest.json"],
       "windows": { "installMode": "passive" }
     }
   }

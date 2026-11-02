@@ -1,5 +1,6 @@
 pub mod commands;
 pub mod execute;
+pub mod feed;
 pub mod fs_os;
 pub mod journal;
 pub mod natural;

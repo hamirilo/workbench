@@ -1,5 +1,5 @@
 // Dev-only in-memory stand-in for the Rust backend, used when the UI is
-// opened in a normal browser (`npm run dev`) instead of inside Tauri
+// opened in a normal browser (`bun run dev`) instead of inside Tauri
 // (Platform playbook: ブラウザで UI を作る). Answers the same commands as
 // src/lib/api.ts with the same types, closely enough for UI work; change
 // both in the same PR. "Scanning" any folder gives the same made-up

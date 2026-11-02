@@ -818,7 +818,7 @@ dependencies = [
 
 [[package]]
 name = "disk-analyzer"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "core-foundation-sys",
  "libc",
