@@ -3590,7 +3590,7 @@ dependencies = [
 
 [[package]]
 name = "shelf"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "core-foundation-sys",
  "objc2",
