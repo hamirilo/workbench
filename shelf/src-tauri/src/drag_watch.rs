@@ -127,6 +127,14 @@ pub mod macos {
                 && p.x < self.origin.x + self.size.x
                 && p.y < self.origin.y + self.size.y
         }
+
+        /// Whether this rect spans all of `other`.
+        fn covers(&self, other: &CGRect) -> bool {
+            self.origin.x <= other.origin.x
+                && self.origin.y <= other.origin.y
+                && self.origin.x + self.size.x >= other.origin.x + other.size.x
+                && self.origin.y + self.size.y >= other.origin.y + other.size.y
+        }
     }
 
     const ON_SCREEN_ONLY: u32 = 1 << 0;
@@ -141,6 +149,8 @@ pub mod macos {
         fn CGRectMakeWithDictionaryRepresentation(dict: CFDictionaryRef, rect: *mut CGRect) -> bool;
         fn CGEventCreate(source: *const c_void) -> CFTypeRef;
         fn CGEventGetLocation(event: CFTypeRef) -> CGPoint;
+        fn CGGetDisplaysWithPoint(point: CGPoint, max: u32, displays: *mut u32, count: *mut u32) -> i32;
+        fn CGDisplayBounds(display: u32) -> CGRect;
     }
 
     /// The pointer, in the same top-left-origin points as window bounds.
@@ -156,9 +166,21 @@ pub mod macos {
         }
     }
 
+    /// The bounds of the display under `at`.
+    fn display_at(at: CGPoint) -> Option<CGRect> {
+        let (mut display, mut count) = (0u32, 0u32);
+        let ok = unsafe { CGGetDisplaysWithPoint(at, 1, &mut display, &mut count) } == 0;
+        (ok && count > 0).then(|| unsafe { CGDisplayBounds(display) })
+    }
+
     /// Whether the frontmost window under `at` belongs to the Dock. Overlays
     /// above it (other system windows) are looked through; an ordinary app
     /// window (layer 0 or below) ends the search.
+    ///
+    /// A Dock window spanning the whole display (a transparent one kept above
+    /// every app window) says nothing about where the Dock is, so it is looked
+    /// through too; otherwise any press and move (dragging a window, selecting
+    /// text) would count as a drag out of the Dock.
     fn on_dock_window(at: CGPoint) -> bool {
         let docks = NSRunningApplication::runningApplicationsWithBundleIdentifier(ns_string!("com.apple.dock"));
         let Some(dock_pid) = docks.iter().next().map(|app| app.processIdentifier()) else {
@@ -169,6 +191,7 @@ pub mod macos {
             if windows.is_null() {
                 return false;
             }
+            let display = display_at(at);
             let mut found = false;
             for i in 0..CFArrayGetCount(windows) {
                 let info = CFArrayGetValueAtIndex(windows, i) as CFDictionaryRef;
@@ -181,6 +204,9 @@ pub mod macos {
                     continue;
                 }
                 if number(info, kCGWindowOwnerPID) == Some(dock_pid) {
+                    if display.is_some_and(|d| bounds.covers(&d)) {
+                        continue;
+                    }
                     found = true;
                     break;
                 }
