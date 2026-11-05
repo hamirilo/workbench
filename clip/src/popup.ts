@@ -21,6 +21,9 @@ let toastTimer: number | undefined;
 /** Where the mouse last was, so a list scrolling under a still mouse doesn't move the selection. */
 let lastMouse = { x: -1, y: -1 };
 
+// macOS draws the popup's rounded corners in CSS (see styles.css).
+if (navigator.userAgent.includes("Mac")) document.documentElement.classList.add("rounded");
+
 const keyOf = (row: Row) => (row.kind === "snippet" ? `s${row.snippet.id}` : `h${row.item.id}`);
 const textOf = (row: Row) => (row.kind === "snippet" ? row.snippet.text : row.item.text);
 
