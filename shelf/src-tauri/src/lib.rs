@@ -191,7 +191,7 @@ fn dock_to_right_edge(window: &WebviewWindow) -> tauri::Result<()> {
 fn round_corners(window: &WebviewWindow) {
     use objc2::{msg_send, runtime::AnyObject};
 
-    const RADIUS: f64 = 14.0;
+    const RADIUS: f64 = 20.0;
     let Ok(view) = window.ns_view() else {
         return;
     };
