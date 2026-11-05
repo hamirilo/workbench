@@ -509,7 +509,7 @@ dependencies = [
 
 [[package]]
 name = "clip"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "core-foundation-sys",
  "objc2",
