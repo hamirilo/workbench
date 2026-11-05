@@ -89,7 +89,7 @@ kbd {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: 999px;
   color: var(--muted);
 }
 
@@ -99,9 +99,9 @@ kbd {
 }
 
 .button {
-  padding: 5px 12px;
+  padding: 5px 14px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 999px;
   background: var(--surface);
   white-space: nowrap;
 }
@@ -144,18 +144,27 @@ kbd {
 /* Popup ------------------------------------------------------------------- */
 
 body.popup {
+  --window-radius: 20px;
   border: 1px solid var(--border);
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* macOS: the popup window itself is transparent (tauri.macos.conf.json), so the
+   page draws its own rounded corners. Windows 11 rounds the window. */
+html.rounded {
+  background: transparent;
+}
+
+html.rounded body.popup {
+  border-radius: var(--window-radius);
 }
 
 .search {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 10px 10px 14px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  padding: 14px 14px 8px 18px;
   color: var(--muted);
 }
 
@@ -165,7 +174,7 @@ body.popup {
   border: 0;
   outline: none;
   background: none;
-  font-size: 16px;
+  font-size: 17px;
   color: var(--text);
 }
 
@@ -173,8 +182,9 @@ body.popup {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin: 2px 12px 4px;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
+  border-radius: 14px;
   background: var(--accent-soft);
   font-size: 12px;
 }
@@ -188,6 +198,25 @@ body.popup {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 40%, transparent) transparent;
+}
+
+/* Thin and rounded, so the scrollbar sits inside the rounded popup. */
+#list-wrap::-webkit-scrollbar {
+  width: 12px;
+}
+
+#list-wrap::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 6px 0;
+}
+
+#list-wrap::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 35%, transparent);
+  border-radius: 999px;
+  border: 4px solid transparent;
+  background-clip: content-box;
 }
 
 #list {
@@ -207,9 +236,9 @@ body.popup {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 34px;
+  min-height: 36px;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 .row.selected {
@@ -264,7 +293,7 @@ body.popup {
   justify-content: center;
   width: 24px;
   height: 24px;
-  border-radius: 5px;
+  border-radius: 999px;
   color: var(--muted);
 }
 
@@ -303,9 +332,10 @@ body.popup {
 
 .preview {
   max-height: 84px;
+  margin: 0 12px 6px;
   padding: 8px 14px;
   overflow-y: auto;
-  border-top: 1px solid var(--border);
+  border-radius: 14px;
   background: var(--surface);
   font-size: 12px;
   white-space: pre-wrap;
@@ -318,8 +348,7 @@ body.popup {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
-  padding: 6px 14px;
-  border-top: 1px solid var(--border);
+  padding: 4px 18px 12px;
   color: var(--muted);
   font-size: 11px;
 }
@@ -334,28 +363,26 @@ body.popup {
 .tabs {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 12px 0;
-  border-bottom: 1px solid var(--border);
+  gap: 2px;
+  padding: 8px 14px;
   user-select: none;
   -webkit-user-select: none;
 }
 
 .tab {
-  padding: 6px 14px 8px;
-  border-bottom: 2px solid transparent;
+  padding: 5px 14px;
+  border-radius: 999px;
   color: var(--muted);
 }
 
 .tab.active {
-  border-bottom-color: var(--accent);
-  color: var(--text);
+  background: var(--accent-soft);
+  color: var(--accent);
   font-weight: 600;
 }
 
 .open-hint {
   margin-left: auto;
-  padding-bottom: 6px;
   color: var(--muted);
   font-size: 12px;
 }
@@ -370,7 +397,6 @@ body.popup {
   display: flex;
   flex-direction: column;
   width: 240px;
-  border-right: 1px solid var(--border);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -387,7 +413,7 @@ body.popup {
   display: flex;
   flex-direction: column;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 .snippet-list li:hover {
@@ -430,7 +456,6 @@ body.popup {
   align-items: center;
   gap: 4px;
   padding: 8px;
-  border-top: 1px solid var(--border);
 }
 
 .editor {
@@ -459,7 +484,7 @@ body.popup {
 }
 
 .chip {
-  padding: 3px 10px;
+  padding: 4px 12px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
@@ -499,9 +524,9 @@ body.popup {
 .field textarea,
 .s-row select {
   flex: none;
-  padding: 6px 8px;
+  padding: 7px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 12px;
   outline: none;
   background: var(--surface);
 }
@@ -570,7 +595,7 @@ body.popup {
 
 .rows {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   background: var(--surface);
 }
 

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "windows": [
+      {
+        "label": "popup",
+        "title": "Clip",
+        "url": "index.html",
+        "width": 560,
+        "height": 420,
+        "decorations": false,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "visibleOnAllWorkspaces": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "transparent": true
+      },
+      {
+        "label": "manage",
+        "title": "Clip — スニペットと設定",
+        "url": "manage.html",
+        "width": 760,
+        "height": 520,
+        "minWidth": 600,
+        "minHeight": 400,
+        "center": true,
+        "visible": false
+      }
+    ]
+  }
+}

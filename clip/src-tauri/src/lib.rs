@@ -265,6 +265,36 @@ fn show_manager(app: &AppHandle) {
     }
 }
 
+/// macOS: clips the (transparent, tauri.macos.conf.json) popup window to
+/// rounded corners. The window shadow follows what is drawn, so clipping the
+/// window itself keeps it from being worked out from a square frame before
+/// the page has drawn its own rounded corners. Same radius as
+/// `--window-radius` in styles.css.
+#[cfg(target_os = "macos")]
+fn round_corners(window: &WebviewWindow) {
+    use objc2::{msg_send, runtime::AnyObject};
+
+    const RADIUS: f64 = 20.0;
+    let Ok(view) = window.ns_view() else {
+        return;
+    };
+    let view = view.cast::<AnyObject>();
+    // SAFETY: `view` is the window's live NSView, used on the main thread
+    // during setup; the messages are plain AppKit / Core Animation setters.
+    unsafe {
+        let _: () = msg_send![view, setWantsLayer: true];
+        let layer: *mut AnyObject = msg_send![view, layer];
+        if !layer.is_null() {
+            let _: () = msg_send![layer, setCornerRadius: RADIUS];
+            let _: () = msg_send![layer, setMasksToBounds: true];
+        }
+        let ns_window: *mut AnyObject = msg_send![view, window];
+        if !ns_window.is_null() {
+            let _: () = msg_send![ns_window, invalidateShadow];
+        }
+    }
+}
+
 /// Centres the popup near the top of the screen the mouse is on, like
 /// Spotlight.
 fn place_popup(window: &WebviewWindow) -> tauri::Result<()> {
@@ -386,6 +416,11 @@ pub fn run() {
             let shortcut = store.settings().shortcut;
             app.manage(store);
             app.manage(Previous::default());
+
+            #[cfg(target_os = "macos")]
+            if let Some(window) = app.get_webview_window("popup") {
+                round_corners(&window);
+            }
 
             login_item::enable_once(app.handle());
             let active = shortcut::register(app.handle(), &shortcut);
