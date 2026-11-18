@@ -1,0 +1,432 @@
+@import "tailwindcss";
+
+/* Platform UI §1: the tokens shared by the desktop tools. `static`: some are
+   only used through var() (the document styles below), which Tailwind
+   doesn't see. */
+@theme static {
+  --color-bg: #1b1c1f;
+  --color-panel: #232428;
+  --color-raised: #2c2d32;
+  --color-line: #34353b;
+  --color-fg: #e6e6e8;
+  --color-dim: #9a9ba3;
+  --color-accent: #4c8dff;
+  --color-danger: #ef5d5d;
+  --color-success: #3ec27f;
+  --color-warn: #e8b04a;
+  /* A button under the pointer, the background of code, the scroll bars. */
+  --color-hover: rgb(255 255 255 / 0.1);
+  --color-code: #24252a;
+  --color-scroll: #45464d;
+
+
+  --animate-toast-in: toast-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  --animate-toast-out: toast-out 0.2s ease-in forwards;
+  --animate-toast-ring: toast-ring 1.1s ease-out;
+  --animate-countdown: countdown linear forwards;
+  --animate-indeterminate: indeterminate 1.2s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.18s ease-out;
+  --animate-zoom-in: zoom-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(48px) scale(0.96);
+    }
+  }
+  @keyframes toast-out {
+    to {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+  }
+  /* A glow around a new result toast, so it is noticed out of the corner of the eye. */
+  @keyframes toast-ring {
+    0% {
+      box-shadow: 0 0 0 0 var(--ring);
+    }
+    100% {
+      box-shadow: 0 0 0 14px transparent;
+    }
+  }
+  @keyframes countdown {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes indeterminate {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes zoom-in {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+  }
+}
+
+/* Light: the window follows the OS (decisions/adr-0001-theme-follows-os.md).
+   The dark values above are Platform UI §1's; these are their light steps. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-bg: #ffffff;
+    --color-panel: #f5f5f7;
+    --color-raised: #eaeaee;
+    --color-line: #dcdce1;
+    --color-fg: #1f2328;
+    --color-dim: #656d76;
+    --color-accent: #0969da;
+    --color-danger: #cf222e;
+    --color-success: #1a7f37;
+    --color-warn: #9a6700;
+    --color-hover: rgb(0 0 0 / 0.06);
+    --color-code: #f6f8fa;
+    --color-scroll: #c4c4cc;
+    color-scheme: light;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* macOS: the page runs under the title bar, with the window buttons over its
+   top left (src/lib/titleBar.ts). Room left for them; none in full screen,
+   where they are hidden, and none on Windows, which keeps its title bar.
+   --titlebar is the toolbar's height there; tauri.conf.json's
+   trafficLightPosition.y (24) puts the buttons' centres halfway down it, in
+   line with the toolbar's own buttons. Change the two together. */
+:root {
+  --titlebar: 0px;
+  --traffic-lights: 0px;
+}
+:root[data-titlebar="overlay"]:not([data-fullscreen]) {
+  --titlebar: 48px;
+  --traffic-lights: 84px;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", "Meiryo",
+    sans-serif;
+  font-size: 13px;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-scroll);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* ------------------------------------------------------------ the document
+   The rendered Markdown (src/components/Viewer.tsx), close to how GitHub
+   shows a README so files read as their authors saw them. Sizes are in em
+   of the article's font size, which the zoom changes. */
+.markdown {
+  font-size: 15px;
+  line-height: 1.75;
+  word-wrap: break-word;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: auto;
+}
+.markdown > :first-child {
+  margin-top: 0 !important;
+}
+.markdown :is(p, blockquote, ul, ol, dl, table, pre, details) {
+  margin: 0 0 1em;
+}
+.markdown :is(h1, h2, h3, h4, h5, h6) {
+  margin: 1.6em 0 0.7em;
+  font-weight: 600;
+  line-height: 1.35;
+  scroll-margin-top: 16px;
+}
+.markdown h1 {
+  font-size: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-line);
+}
+.markdown h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-line);
+}
+.markdown h3 {
+  font-size: 1.25em;
+}
+.markdown h4 {
+  font-size: 1em;
+}
+.markdown h5 {
+  font-size: 0.875em;
+}
+.markdown h6 {
+  font-size: 0.85em;
+  color: var(--color-dim);
+}
+/* The heading just jumped to from the outline, for a moment. */
+.markdown .jumped {
+  animation: jumped 1.2s ease-out;
+}
+@keyframes jumped {
+  from {
+    background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  }
+}
+.markdown a {
+  color: var(--color-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.markdown a:hover {
+  text-decoration: underline;
+}
+.markdown strong {
+  font-weight: 600;
+}
+.markdown :is(ul, ol) {
+  padding-left: 2em;
+}
+.markdown ul {
+  list-style: disc;
+}
+.markdown ol {
+  list-style: decimal;
+}
+.markdown li + li,
+.markdown li > :is(ul, ol) {
+  margin-top: 0.25em;
+}
+.markdown li > :is(ul, ol) {
+  margin-bottom: 0;
+}
+.markdown ul ul {
+  list-style: circle;
+}
+.markdown .contains-task-list {
+  list-style: none;
+  padding-left: 1.2em;
+}
+.markdown .task-list-item input {
+  margin: 0 0.4em 0.2em -1.2em;
+  vertical-align: middle;
+  pointer-events: none;
+}
+.markdown blockquote {
+  padding: 0 1em;
+  color: var(--color-dim);
+  border-left: 0.25em solid var(--color-line);
+}
+.markdown hr {
+  height: 0.25em;
+  margin: 1.5em 0;
+  border: 0;
+  background: var(--color-line);
+}
+.markdown img {
+  max-width: 100%;
+  box-sizing: content-box;
+}
+/* A picture that couldn't be shown: its alt text in a box (Viewer.tsx). */
+.markdown .img-missing {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  border: 1px dashed var(--color-line);
+  border-radius: 4px;
+  color: var(--color-dim);
+  font-size: 0.85em;
+}
+.markdown table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-collapse: collapse;
+}
+.markdown :is(th, td) {
+  padding: 0.4em 0.9em;
+  border: 1px solid var(--color-line);
+}
+.markdown th {
+  font-weight: 600;
+  background: var(--color-panel);
+}
+.markdown tr:nth-child(2n) td {
+  background: color-mix(in srgb, var(--color-panel) 50%, transparent);
+}
+.markdown :is(code, pre, kbd) {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "BIZ UDGothic", monospace;
+  font-size: 0.875em;
+}
+.markdown :not(pre) > code {
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  background: var(--color-code);
+}
+.markdown pre {
+  padding: 1em;
+  overflow: auto;
+  line-height: 1.5;
+  border-radius: 6px;
+  background: var(--color-code);
+}
+.markdown pre code {
+  font-size: inherit;
+}
+.markdown kbd {
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--color-line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}
+.markdown .footnotes {
+  font-size: 0.85em;
+  color: var(--color-dim);
+  border-top: 1px solid var(--color-line);
+  padding-top: 1em;
+}
+
+/* Code colors (highlight.js classes, src/lib/highlight.ts), after GitHub's. */
+.hljs-comment,
+.hljs-quote {
+  color: #8b949e;
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type,
+.hljs-doctag,
+.hljs-meta .hljs-keyword {
+  color: #ff7b72;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-meta .hljs-string {
+  color: #a5d6ff;
+}
+.hljs-number,
+.hljs-literal,
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id {
+  color: #79c0ff;
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: #d2a8ff;
+}
+.hljs-built_in,
+.hljs-symbol,
+.hljs-name,
+.hljs-tag,
+.hljs-meta {
+  color: #7ee787;
+}
+.hljs-addition {
+  color: #aff5b4;
+  background: #033a16;
+}
+.hljs-deletion {
+  color: #ffdcd7;
+  background: #67060c;
+}
+@media (prefers-color-scheme: light) {
+  .hljs-comment,
+  .hljs-quote {
+    color: #6e7781;
+  }
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-type,
+  .hljs-doctag,
+  .hljs-meta .hljs-keyword {
+    color: #cf222e;
+  }
+  .hljs-string,
+  .hljs-regexp,
+  .hljs-meta .hljs-string {
+    color: #0a3069;
+  }
+  .hljs-number,
+  .hljs-literal,
+  .hljs-attr,
+  .hljs-attribute,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-selector-attr,
+  .hljs-selector-class,
+  .hljs-selector-id {
+    color: #0550ae;
+  }
+  .hljs-title,
+  .hljs-title.function_,
+  .hljs-section {
+    color: #8250df;
+  }
+  .hljs-built_in,
+  .hljs-symbol,
+  .hljs-name,
+  .hljs-tag,
+  .hljs-meta {
+    color: #116329;
+  }
+  .hljs-addition {
+    color: #116329;
+    background: #dafbe1;
+  }
+  .hljs-deletion {
+    color: #82071e;
+    background: #ffebe9;
+  }
+}
