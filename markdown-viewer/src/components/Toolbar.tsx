@@ -39,9 +39,11 @@ export function Toolbar() {
         {name}
         {loading && <span className="ml-2 font-normal text-dim">読み込み中…</span>}
       </div>
+      <CommandButton id="file.copyText" />
+      <CommandButton id="view.raw" />
+      <CommandButton id="view.theme" />
       <CommandButton id="file.reload" />
       <CommandButton id="file.reveal" />
-      <CommandButton id="file.open" label="開く" />
     </header>
   );
 }

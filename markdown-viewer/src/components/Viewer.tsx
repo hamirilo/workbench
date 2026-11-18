@@ -48,18 +48,25 @@ const headingsOf = (root: HTMLElement): Heading[] =>
 export function Viewer() {
   const doc = useStore((s) => s.doc);
   const zoom = useStore((s) => s.zoom);
+  const raw = useStore((s) => s.raw);
   const scroller = useRef<HTMLDivElement>(null);
   const article = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
+    if (!doc) return;
+    // The Markdown text as written has no headings to list.
+    if (raw) {
+      useStore.getState().setHeadings([]);
+      return;
+    }
     const el = article.current;
-    if (!el || !doc) return;
+    if (!el) return;
     el.innerHTML = holdImages(doc.html);
     highlightCode(el);
     loadImages(el);
     useStore.getState().setHeadings(headingsOf(el));
     scroller.current?.scrollTo({ top: takeKeptScroll() ?? 0 });
-  }, [doc]);
+  }, [doc, raw]);
 
   // The heading at the top, for the outline; at most once a frame.
   useEffect(() => {
@@ -85,7 +92,7 @@ export function Viewer() {
     onScroll();
     box.addEventListener("scroll", onScroll, { passive: true });
     return () => box.removeEventListener("scroll", onScroll);
-  }, [doc]);
+  }, [doc, raw]);
 
   // The article takes the keys (space, page down…) without a click first.
   useEffect(() => scroller.current?.focus({ preventScroll: true }), [doc?.path]);
@@ -100,12 +107,22 @@ export function Viewer() {
 
   return (
     <div ref={scroller} data-article tabIndex={-1} className="min-h-0 min-w-0 flex-1 overflow-y-auto outline-none">
-      <article
-        ref={article}
-        onClick={onClick}
-        className="markdown mx-auto max-w-[860px] px-10 pt-8 pb-24"
-        style={{ fontSize: `${BASE_FONT * zoom}px` }}
-      />
+      {raw ? (
+        // The text as written: no rendering, so no links or pictures either.
+        <pre
+          className="mx-auto max-w-[860px] px-10 pt-8 pb-24 font-mono leading-relaxed break-words whitespace-pre-wrap text-fg"
+          style={{ fontSize: `${BASE_FONT * zoom}px` }}
+        >
+          {doc?.source}
+        </pre>
+      ) : (
+        <article
+          ref={article}
+          onClick={onClick}
+          className="markdown mx-auto max-w-[860px] px-10 pt-8 pb-24"
+          style={{ fontSize: `${BASE_FONT * zoom}px` }}
+        />
+      )}
     </div>
   );
 }

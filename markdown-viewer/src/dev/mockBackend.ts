@@ -89,6 +89,7 @@ function doc(path: string): Doc {
     path,
     name: path.split(/[\\/]/).pop() ?? path,
     html: HTML(saves),
+    source: "# モック\n\nブラウザで UI だけ確かめるための文書です。\n",
     encoding: "UTF-8",
     size: 2_480 + saves,
     modified: Date.now(),

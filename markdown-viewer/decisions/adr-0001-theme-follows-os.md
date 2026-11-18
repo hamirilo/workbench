@@ -1,6 +1,6 @@
 # ADR-0001：テーマは OS に合わせる
 
-- 状態：採用
+- 状態：採用（改訂 2026-11-18：ツールバーで手動切り替えを追加）
 - 日付：2026-11-18
 - 対象の Standard：UI §1（ダークを既定、ライトテーマは作らない）
 
@@ -11,7 +11,8 @@
 
 ## 決定
 
-- テーマは **OS の設定に合わせて** ライト / ダークを切り替える（`prefers-color-scheme`）。色は `src/index.css` のトークンにまとめ、ダークの値は UI §1 のもの、ライトの値は `@media (prefers-color-scheme: light)` で上書きする
+- テーマは **既定で OS の設定に合わせて** ライト / ダークを切り替える（`prefers-color-scheme`）。色は `src/index.css` のトークンにまとめ、ダークの値は UI §1 のもの、ライトの値は `@media (prefers-color-scheme: light)` で上書きする
+- 改訂：ツールバーの「ダークモード」ボタンで、表示をライト / ダークに手動で固定できる（もう一度押すと OS に合わせる設定ではなく、反対の色に切り替わる）。選んだ値は localStorage に保存する。手動の値は `data-theme` 属性で `src/index.css` が読む。OS 追従のルールは `:root:not([data-theme="dark"])` で守り、手動のライトは `:root[data-theme="light"]` で同じ値を当てる
 - ウィンドウの `theme` と `backgroundColor` は指定しない（OS に合わせるため。起動時の一瞬の色の違いは受け入れる）
 - コードの色分けも、モードごとに色を変える（GitHub の配色に合わせた）
 

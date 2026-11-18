@@ -4,12 +4,12 @@
  * so a name and its key read the same everywhere. Add an operation here
  * first, never straight into a menu or a key handler.
  */
-import { FileText, FolderOpen, PanelLeft, RotateCw, X, type LucideIcon } from "lucide-react";
-import { chooseFile, closeDoc, copyPath, reload, revealDoc, revealLabel, zoom } from "./actions";
+import { Code, Copy, FileText, FolderOpen, Moon, PanelLeft, RotateCw, X, type LucideIcon } from "lucide-react";
+import { chooseFile, closeDoc, copyMarkdown, copyPath, reload, revealDoc, revealLabel, zoom } from "./actions";
 import { api } from "./api";
 import { comboMatches, fromField } from "./keys";
 import { checkForUpdate, openReleaseNotes } from "./update";
-import { useStore, ZOOMS, type S } from "../store";
+import { isDark, useStore, ZOOMS, type S } from "../store";
 
 export interface Command {
   id: string;
@@ -69,6 +69,13 @@ export const COMMANDS: Command[] = [
     run: () => void copyPath(),
   },
   {
+    id: "file.copyText",
+    title: "Markdown をコピー",
+    icon: Copy,
+    enabled: shown,
+    run: () => void copyMarkdown(),
+  },
+  {
     id: "view.outline",
     title: "目次",
     icon: PanelLeft,
@@ -76,6 +83,22 @@ export const COMMANDS: Command[] = [
     enabled: shown,
     checked: (s) => s.outline,
     run: (s) => s.toggleOutline(),
+  },
+  {
+    id: "view.raw",
+    title: "Markdown のまま表示",
+    icon: Code,
+    keys: ["Mod+Shift+M"],
+    enabled: shown,
+    checked: (s) => s.raw,
+    run: (s) => s.toggleRaw(),
+  },
+  {
+    id: "view.theme",
+    title: "ダークモード",
+    icon: Moon,
+    checked: (s) => isDark(s),
+    run: (s) => s.setTheme(isDark(s) ? "light" : "dark"),
   },
   {
     id: "view.zoomIn",
