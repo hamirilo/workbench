@@ -61,8 +61,15 @@ interface State {
   current: string | null;
   outline: boolean;
   zoom: number;
+  /** Show the file's Markdown text as written, not the rendered page. */
+  raw: boolean;
+  theme: Theme;
+  /** The OS is in dark mode now (follows changes). */
+  osDark: boolean;
 
   setDoc: (doc: Doc | null) => void;
+  toggleRaw: () => void;
+  setTheme: (t: Theme) => void;
   setLoading: (path: string | null) => void;
   setHeadings: (h: Heading[]) => void;
   setCurrent: (id: string | null) => void;
@@ -96,6 +103,23 @@ const persist = (key: string, value: string) => {
 
 const savedZoom = Number(load("zoom"));
 
+/** Light / dark: "auto" follows the OS (ADR-0001); the other two are chosen in the toolbar. */
+export type Theme = "auto" | "light" | "dark";
+const savedTheme = load("theme");
+const initialTheme: Theme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : "auto";
+
+const osDarkQuery = typeof matchMedia === "function" ? matchMedia("(prefers-color-scheme: dark)") : null;
+
+/** The attribute the stylesheet reads (src/index.css); none means the OS decides. */
+const applyTheme = (t: Theme) => {
+  if (t === "auto") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = t;
+};
+applyTheme(initialTheme);
+
+/** Whether dark is on now, whatever chose it. */
+export const isDark = (s: Pick<State, "theme" | "osDark">) => s.theme === "dark" || (s.theme === "auto" && s.osDark);
+
 export const useStore = create<State>()((set, get) => ({
   toasts: [],
   updating: null,
@@ -107,6 +131,9 @@ export const useStore = create<State>()((set, get) => ({
   current: null,
   outline: load("outline") !== "off",
   zoom: ZOOMS.includes(savedZoom) ? savedZoom : 1,
+  raw: load("raw") === "on",
+  theme: initialTheme,
+  osDark: osDarkQuery?.matches ?? false,
 
   setDoc: (doc) => set(doc ? { doc } : { doc, headings: [], current: null }),
   setLoading: (loading) => set({ loading }),
@@ -122,6 +149,16 @@ export const useStore = create<State>()((set, get) => ({
   setZoom: (zoom) => {
     set({ zoom });
     persist("zoom", String(zoom));
+  },
+  toggleRaw: () => {
+    const raw = !get().raw;
+    set({ raw });
+    persist("raw", raw ? "on" : "off");
+  },
+  setTheme: (theme) => {
+    set({ theme });
+    applyTheme(theme);
+    persist("theme", theme);
   },
 
   setUpdating: (updating) => set({ updating }),
@@ -142,5 +179,7 @@ export const useStore = create<State>()((set, get) => ({
     setTimeout(() => set({ toasts: get().toasts.filter((t) => t.id !== id) }), 200);
   },
 }));
+
+osDarkQuery?.addEventListener("change", (e) => useStore.setState({ osDark: e.matches }));
 
 export type S = State;

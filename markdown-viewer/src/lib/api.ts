@@ -14,6 +14,8 @@ export interface Doc {
   name: string;
   /** Rendered by comrak: raw HTML in the file is left out. */
   html: string;
+  /** The text as written in the file (copied; shown in the Markdown view). */
+  source: string;
   encoding: "UTF-8" | "Shift_JIS";
   size: number;
   /** Last saved, ms since 1970; 0 if unknown. */

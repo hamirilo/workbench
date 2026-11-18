@@ -87,6 +87,18 @@ export async function copyPath() {
   }
 }
 
+/** The file's Markdown text as written (not the rendered page), to the clipboard. */
+export async function copyMarkdown() {
+  const d = st().doc;
+  if (!d) return;
+  try {
+    await navigator.clipboard.writeText(d.source);
+    st().notify({ title: "Markdown をコピーしました", detail: `${d.name}（${d.source.length.toLocaleString("ja-JP")} 文字）`, kind: "success", duration: 2500 });
+  } catch (e) {
+    st().toast(`コピーできませんでした: ${e}`, true);
+  }
+}
+
 export function zoom(step: 1 | -1 | 0) {
   const i = ZOOMS.indexOf(st().zoom);
   const next = step === 0 ? 1 : ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, (i < 0 ? 2 : i) + step))];

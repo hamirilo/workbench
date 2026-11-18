@@ -22,6 +22,8 @@ pub struct Doc {
     pub path: String,
     pub name: String,
     pub html: String,
+    /// The file's text as written (for copying and the Markdown view).
+    pub source: String,
     pub encoding: &'static str,
     pub size: u64,
     /// When it was last saved (ms since 1970); 0 if the OS doesn't say.
@@ -68,6 +70,7 @@ pub fn open(path: &Path) -> Result<(Doc, Stamp), String> {
         path: path.display().to_string(),
         name: path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default(),
         html: render::to_html(&text),
+        source: text,
         encoding,
         size: meta.len(),
         modified: ms(stamp.modified),
@@ -192,6 +195,7 @@ mod tests {
         let (doc, stamp) = open(&md).unwrap();
         assert_eq!(doc.name, "メモ.md");
         assert!(doc.html.contains("<h1"));
+        assert_eq!(doc.source, "# 見出し\n");
         assert_eq!(stamp.len, 12);
 
         assert!(open(dir.path()).unwrap_err().contains("フォルダ"));
